@@ -497,7 +497,8 @@ with tabs[1]:
             margin=dict(l=20, r=20, t=40, b=20)
         )
 
-    st.plotly_chart(fig_hijos, width=False)  # 👈 mejor sin "container_width"
+    #st.plotly_chart(fig_hijos, width=False)  # 👈 mejor sin "container_width"
+    st.plotly_chart(fig_hijos)  # 👈 mejor sin "container_width"
     
     # --- Gráficos categóricos ---
     st.subheader("Otras variables demográficas")
@@ -2167,3 +2168,4 @@ with tabs[7]:
 #    st.dataframe(df_filtrado)
 #    csv = df_filtrado.to_csv(index=False).encode('utf-8')
 #    st.download_button("📥 Descargar CSV", data=csv, file_name='censo_filtrado.csv', mime='text/csv')
+
