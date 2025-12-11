@@ -286,7 +286,8 @@ with tabs[0]:
     )
 
 
-    st.plotly_chart(fig_lug, use_container_width=True)
+    #st.plotly_chart(fig_lug, use_container_width=True)
+    st.plotly_chart(fig_lug)
 
     # --- Mapa a todo el ancho ---
     #st.subheader("Mapa de nacimiento")
@@ -380,8 +381,8 @@ def grafico_categorico(
             # 👉 Quitar leyenda en horizontales
             fig.update_layout(showlegend=False)
             fig.update_traces(textposition="inside")
-            st.plotly_chart(fig, width='stretch')
-
+            #st.plotly_chart(fig, width='stretch')
+            st.plotly_chart(fig)
         else:
             altura = alto_vertical
             ancho = ancho_vertical
@@ -398,7 +399,8 @@ def grafico_categorico(
             )
             # 👉 En vertical la dejamos (si querés la podés quitar también)
             fig.update_traces(textposition="inside")
-            st.plotly_chart(fig, width=False)
+            #st.plotly_chart(fig, width=False)
+            st.plotly_chart(fig)
 
         # Fondo transparente y grillas suaves
         fig.update_layout(
@@ -456,8 +458,8 @@ with tabs[1]:
         )
     )
 
-    st.plotly_chart(fig_edad, width='stretch')
-
+    #st.plotly_chart(fig_edad, width='stretch')
+    st.plotly_chart(fig_edad)
     # Cantidad de hijos
     if 'cta_hijos' in df_filtrado.columns:
         df_filtrado['cta_hijos'] = df_filtrado['cta_hijos'].fillna(0).round(0).astype(int)
@@ -499,7 +501,6 @@ with tabs[1]:
 
     #st.plotly_chart(fig_hijos, width=False)  # 👈 mejor sin "container_width"
     st.plotly_chart(fig_hijos)  # 👈 mejor sin "container_width"
-    
     # --- Gráficos categóricos ---
     st.subheader("Otras variables demográficas")
     
@@ -553,7 +554,8 @@ with tabs[1]:
                     )
                 )
 
-                st.plotly_chart(fig_pie, width=False)
+                #st.plotly_chart(fig_pie, width=False)
+                st.plotly_chart(fig_pie)
             else:
                 st.warning(f"No hay datos para la columna '{columna}'")
         elif columna == 'Habitabilidad':
@@ -588,7 +590,8 @@ with tabs[1]:
                         )
                     )
 
-                    st.plotly_chart(fig_pie, width=False)
+                    #st.plotly_chart(fig_pie, width=False)
+                    st.plotly_chart(fig_pie)
                 else:
                     st.warning(f"No hay datos para la columna '{columna}'")
         else:
@@ -635,8 +638,8 @@ with tabs[2]:
             with col1:
   
                 fig_otro.update_yaxes(categoryorder='total ascending')
-                st.plotly_chart(fig_otro, width='stretch')
-
+                #st.plotly_chart(fig_otro, width='stretch')
+                st.plotly_chart(fig_otro)
 
             titulos = df_tab['titulo'].value_counts().reset_index()
             titulos.columns = ['titulo','cantidad']
@@ -663,8 +666,8 @@ with tabs[2]:
                     margin=dict(l=150, r=20, t=60, b=20)
                     )
 
-                st.plotly_chart(fig_pie, width='stretch')
-
+                #st.plotly_chart(fig_pie, width='stretch')
+                st.plotly_chart(fig_pie)
         
         
         # ------------------------
@@ -714,7 +717,9 @@ with tabs[2]:
                         coloraxis_showscale=True
                     )
 
-                    st.plotly_chart(fig_inst, width='stretch', key="inst_cantidad_porcentaje")
+                    #st.plotly_chart(fig_inst, width='stretch', key="inst_cantidad_porcentaje")
+                    st.plotly_chart(fig_inst, key="inst_cantidad_porcentaje")
+
 
             with col2:
                 fig_prom = px.histogram(
@@ -730,8 +735,8 @@ with tabs[2]:
                     bargroupgap=0.1
                 )
 
-                st.plotly_chart(fig_prom, width='stretch', key="dist_general")
-
+                #st.plotly_chart(fig_prom, width='stretch', key="dist_general")
+                st.plotly_chart(fig_prom,key="dist_general")
             
             if 'titulo' in df_tab.columns:
                 fig_box = px.box(
@@ -808,8 +813,8 @@ with tabs[2]:
                 )
 
 
-                st.plotly_chart(fig_box, width='stretch')
-
+                #st.plotly_chart(fig_box, width='stretch')
+                st.plotly_chart(fig_box)
 
 
 
@@ -848,7 +853,8 @@ with tabs[2]:
                     )
                 )
 
-                st.plotly_chart(fig_multi, width='stretch')
+                #st.plotly_chart(fig_multi, width='stretch')
+                st.plotly_chart(fig_multi)
 
         with col4:
             if 'titulo_otracarrera' in df_tab.columns:
@@ -862,8 +868,8 @@ with tabs[2]:
                     color='cantidad',
                     color_discrete_sequence=px.colors.qualitative.Bold
                 )
-                st.plotly_chart(fig_otro, width='stretch')
-
+                #st.plotly_chart(fig_otro, width='stretch')
+                st.plotly_chart(fig_otro)
         # ------------------------
         # Universidades / Fecha finalización
         # ------------------------
@@ -881,8 +887,8 @@ with tabs[2]:
                     color='cantidad',
                     color_discrete_sequence=px.colors.qualitative.Pastel
                 )
-                st.plotly_chart(fig_uni, width='stretch')
-
+                #st.plotly_chart(fig_uni, width='stretch')
+                st.plotly_chart(fig_uni)
         with col6:
             if 'fec_finalizootracarrera' in df_tab.columns:
                     # Convertir a número, ignorando errores
@@ -924,7 +930,8 @@ with tabs[2]:
                             yaxis_title="Cantidad de personas"
                         )
 
-                        st.plotly_chart(fig_year, width='stretch')
+                        #st.plotly_chart(fig_year, width='stretch')
+                        st.plotly_chart(fig_year)
                     else:
                         st.write("No hay datos válidos de años de finalización de otra carrera.")
     ##idiomas
@@ -979,8 +986,8 @@ with tabs[2]:
     )
     
     fig.update_traces(textposition='outside')
-    st.plotly_chart(fig, width='stretch')
-
+    #st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(fig)
 
 
         
@@ -1043,8 +1050,8 @@ with tabs[3]:
                 title="Estado de las becas",
                 color_discrete_sequence=px.colors.qualitative.Set2
             )
-            st.plotly_chart(fig_estado, width='stretch')
-
+            #st.plotly_chart(fig_estado, width='stretch')
+            st.plotly_chart(fig_estado)
         
         ###    
 
@@ -1080,8 +1087,8 @@ with tabs[3]:
             )
 
         fig_unidoc.update_traces(textposition='outside')
-        st.plotly_chart(fig_unidoc, width='stretch')
-    
+        #st.plotly_chart(fig_unidoc, width='stretch')
+        st.plotly_chart(fig_unidoc)
            
     ##
     col3, col4 = st.columns(2)
@@ -1113,8 +1120,8 @@ with tabs[3]:
 
             fig_ext.update_traces(textposition='outside')
 
-            st.plotly_chart(fig_ext, width='stretch')
-
+            #st.plotly_chart(fig_ext, width='stretch')
+            st.plotly_chart(fig_ext)
     # ---- Gráfico ancho debajo ----
     # Año de inicio de doctorado
     with col4:
@@ -1136,8 +1143,8 @@ with tabs[3]:
                     height=400
                 )
                 fig_year.update_traces(textposition='outside')
-                st.plotly_chart(fig_year, width='stretch')
-
+                #st.plotly_chart(fig_year, width='stretch')
+                st.plotly_chart(fig_year)
        # -----------------------
        # Tabla con temas e investigador
        # -----------------------
@@ -1324,7 +1331,8 @@ with tabs[4]:
         fig_carrera.update_traces(texttemplate='%{text:.1f}', textposition='inside',)
         fig_carrera.update_layout(coloraxis_colorbar_tickformat=".1f")
 
-        st.plotly_chart(fig_carrera, width='stretch')
+        #st.plotly_chart(fig_carrera, width='stretch')
+        st.plotly_chart(fig_carrera)
 
         # 4b. Gráfico opcional: duración promedio por universidad
         if 'uni_doctorado' in df_duracion.columns:
@@ -1351,8 +1359,8 @@ with tabs[4]:
             )
             fig_uni.update_traces(texttemplate='%{text:.1f}', textposition='outside')
             fig_uni.update_layout(coloraxis_colorbar_tickformat=".1f")
-            st.plotly_chart(fig_uni, width='stretch')
-
+            #st.plotly_chart(fig_uni, width='stretch')
+            st.plotly_chart(fig_uni)
 
 
     # 5. Visualizaciones adicionales
@@ -1442,8 +1450,8 @@ with tabs[4]:
                         color_continuous_scale=paleta
                     )
                     fig.update_traces(texttemplate='%{text}', textposition='outside')
-                    st.plotly_chart(fig, width='stretch')
-
+                    #st.plotly_chart(fig, width='stretch')
+                    st.plotly_chart(fig)
 
 # ---------- Producción Académica ----------
 
@@ -1565,7 +1573,8 @@ with tabs[5]:
                 )
            # cols[j].plotly_chart(fig, use_container_width=True, height=500, key=f"{campo}_{i}_{j}")
 
-            st.plotly_chart(fig, use_container_width=True, height=700, key="contacto_red")
+            #st.plotly_chart(fig, use_container_width=True, height=700, key="contacto_red")
+            st.plotly_chart(fig, height=700, key="contacto_red")
             #cols[j].plotly_chart(fig, use_container_width=True, height=700, key="contacto_red")
 
     # ---------------------------
@@ -1627,8 +1636,8 @@ with tabs[5]:
                         yaxis=dict(automargin=True)
                     )
 
-                    st.plotly_chart(fig, use_container_width=True, key=f"{campo}")
-
+                    #st.plotly_chart(fig, use_container_width=True, key=f"{campo}")
+                    st.plotly_chart(fig, key=f"{campo}")
             # --- Caso organismo_financiabecaext: todos valores 1 → tabla ---
         
             
@@ -1739,8 +1748,8 @@ with tabs[5]:
         )
 
         # Mostrar en Streamlit
-        st.plotly_chart(fig, use_container_width=True)
-
+        #st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig)
 
 
 
@@ -1973,8 +1982,9 @@ with tabs[7]:
                         ),
                         margin=dict(l=10, r=10, t=40, b=40)
                     )
-                    st.plotly_chart(fig, use_container_width=True, height=400)
+                    #st.plotly_chart(fig, use_container_width=True, height=400)
 
+                    st.plotly_chart(fig,height=400)
                 
     #cols = st.columns(2)  # dos columnas para gráficos
     cols = st.columns(2, gap="medium")  # dos columnas iguales
@@ -2041,8 +2051,8 @@ with tabs[7]:
                     )
 
                 with cols[i % 2]:  # alterna entre las dos columnas
-                    st.plotly_chart(fig, use_container_width=True, height=400)
-
+                    #st.plotly_chart(fig, use_container_width=True, height=400)
+                    st.plotly_chart(fig, height=400)
 
 # ---------- Nube de palabras de revistas ----------
     st.subheader("Nube de palabras de revistas")
@@ -2168,4 +2178,3 @@ with tabs[7]:
 #    st.dataframe(df_filtrado)
 #    csv = df_filtrado.to_csv(index=False).encode('utf-8')
 #    st.download_button("📥 Descargar CSV", data=csv, file_name='censo_filtrado.csv', mime='text/csv')
-
