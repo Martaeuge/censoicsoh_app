@@ -71,8 +71,8 @@ h3 { color: #202124; font-weight: 500; font-size: 1.5rem; }
 /* ------------------------
    Métricas / KPI
 ------------------------ */
-.stMetric-value { color: #1A73E8 !important; font-size: 2rem; font-weight: 700; }
-.stMetric-label { color: #202124 !important; font-weight: 500; }
+.stMetric-value { color: #1A73E8 !important; font-size: 1.8rem; font-weight: 700; }
+.stMetric-label { color: #202124 !important; font-size: 0.5rem; font-weight: 500; }
 
 /* ------------------------
    Cards y contenedores
@@ -186,7 +186,8 @@ with tabs[0]:
     col4.metric("⚥ Género más frecuente", df_filtrado['genero'].mode()[0] if not df_filtrado.empty else "N/A")
 
     # --- Gráficos lado a lado ---
-    col_g1, col_g2 = st.columns(2, gap="medium")
+    #col_g1, col_g2 = st.columns(2, gap="medium")
+    col_g1, col_g2 = st.columns(2, gap="small")
 
     # Contar la cantidad de personas por género
     # Contar la cantidad de personas por género
@@ -212,43 +213,37 @@ with tabs[0]:
         plot_bgcolor='rgba(0,0,0,0)'
     )
 
-    col_g1.plotly_chart(fig_gen, width='stretch')
-
+    #col_g1.plotly_chart(fig_gen, width='stretch')
+    col_g1.plotly_chart(fig_gen)
     # Gráfico 2: Estado civil (Bar)
     df_estado = df_filtrado['estado_civil'].value_counts().reset_index()
     df_estado.columns = ['estado_civil', 'count']
+    ##########333
     fig_est = px.bar(
         df_estado,
         x='estado_civil',
         y='count',
         title="Estado Civil",
-        color='estado_civil',
-        color_discrete_sequence=px.colors.qualitative.Set1,
-        text='count'  # 🔹 esto agrega los valores encima de las barras
-    )
+        text='count',
+        color_discrete_sequence=px.colors.qualitative.Set1  # sin color por categoría
+        )
+
     fig_est.update_layout(
-        #title_font=dict(color='white', size=22),
-        #font=dict(color='white', size=14),
+        bargap=0.05,   # 👈 ahora SÍ funciona
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        #xaxis=dict(title_font=dict(color='white', size=16), tickfont=dict(color='white', size=14)),
-        #yaxis=dict(title_font=dict(color='white', size=16), tickfont=dict(color='white', size=14))
+        showlegend=False
+    )
+    fig_est.update_traces(
+        marker_color=px.colors.qualitative.Set1
     )
 
-    fig_est.update_layout(
-        title_font=dict(color='#202124', size=22),
-        font=dict(color='#202124', size=14),
-        paper_bgcolor='rgba(0,0,0,0)',  
-        plot_bgcolor='rgba(0,0,0,0)',
-        #xaxis=dict(title_font=dict(color='#202124', size=16),
-        #           tickfont=dict(color='#202124', size=14)),
-        #yaxis=dict(title_font=dict(color='#202124', size=16),
-        #           tickfont=dict(color='#202124', size=14))
-    )
-
-
-    col_g2.plotly_chart(fig_est, width='stretch')
-
+    
+    
+    ##############3
+    
+    #col_g2.plotly_chart(fig_est, width='stretch')
+    col_g2.plotly_chart(fig_est)
 
     #Lugar de nacimiento
     # 
@@ -259,7 +254,7 @@ with tabs[0]:
         df_nac,
         x='lugar_nac',
         y='count',
-        title="Lugar Naciomiento",
+        title="Lugar Nacimiento",
         color='lugar_nac',
         color_discrete_sequence=px.colors.qualitative.Set1,
         text='count'  # 🔹 esto agrega los valores encima de las barras
@@ -279,6 +274,10 @@ with tabs[0]:
         font=dict(color='#202124', size=14),
         paper_bgcolor='rgba(0,0,0,0)',  
         plot_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(
+        tickangle=-45  # 👈 ángulo oblicuo
+        ),
+
         #xaxis=dict(title_font=dict(color='#202124', size=16),
         #           tickfont=dict(color='#202124', size=14)),
         #yaxis=dict(title_font=dict(color='#202124', size=16),
@@ -406,6 +405,10 @@ def grafico_categorico(
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
+            ##
+            bargap=0.15,        # espacio entre barras (↓ = barras más gruesas)
+            bargroupgap=0.05,    # espacio entre grupos (↓ = más gruesas)
+            ##
             xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.2)', dtick=1),
             yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.2)', dtick=1)
         )
@@ -544,14 +547,22 @@ with tabs[1]:
                     width=1000,   # más ancho para la leyenda
                     height=500,
                     margin=dict(l=20, r=20, t=60, b=20),
+                    #legend=dict(
+                    #    orientation="v",  # vertical
+                    #    y=0.5,            # centrada verticalmente
+                    #    x=0.85,           # dentro del gráfico, a la derecha
+                    #    xanchor="left",
+                    #    yanchor="middle",
+                    #    font=dict(size=12)
+                    #)
                     legend=dict(
-                        orientation="v",  # vertical
-                        y=0.5,            # centrada verticalmente
-                        x=0.85,           # dentro del gráfico, a la derecha
-                        xanchor="left",
-                        yanchor="middle",
+                       orientation="h",     # 👈 horizontal
+                        y=-0.2,              # 👈 debajo de la dona
+                        x=0.5,               # 👈 centrada
+                        xanchor="center",
+                        yanchor="top",
                         font=dict(size=12)
-                    )
+                    )               
                 )
 
                 #st.plotly_chart(fig_pie, width=False)
@@ -605,6 +616,7 @@ with tabs[2]:
     
     if df_filtrado.empty:
         st.warning("No hay datos disponibles después de aplicar los filtros.")
+    
     else:
         df_tab = df_filtrado.copy()
         # ------------------------
@@ -632,7 +644,8 @@ with tabs[2]:
             )
             fig_otro.update_yaxes(automargin=True)  # 🔹 que entren todos los nombres
             fig_otro.update_layout(
-                margin=dict(l=200, r=20, t=60, b=20)
+                margin=dict(l=200, r=20, t=60, b=20),
+                coloraxis_showscale=False
             )
             # Forzar que respete el orden
             with col1:
@@ -652,10 +665,28 @@ with tabs[2]:
                 color_discrete_sequence=px.colors.qualitative.Set3
             )
 
-            fig_otro.update_layout(
-                height=800,  # 🔹 más alto
-                margin=dict(l=150, r=20, t=60, b=20)
+            #fig_otro.update_layout(
+            #    height=800,  # 🔹 más alto
+            #    margin=dict(l=150, r=20, t=60, b=20)
+            #    )
+
+            fig_pie.update_layout(
+                height=700,
+                #margin=dict(l=20, r=20, t=60, b=120),  # 👈 más espacio abajo
+                legend=dict(
+                    orientation="h",     # horizontal
+                    yanchor="top",
+                    y=-0.15,             # 👈 debajo de la dona
+                    xanchor="center",
+                    x=0.5,
+                    entrywidth=150,      # 👈 CLAVE: fuerza salto a varias filas
+                    entrywidthmode="pixels"
                 )
+            )
+
+
+
+
 
             # Opcional: mostrar valores y porcentajes en las etiquetas
             with col2:
@@ -700,24 +731,31 @@ with tabs[2]:
                     # Gráfico de barras con cantidad y color por porcentaje
                     fig_inst = px.bar(
                         df_inst,
-                        x='institucion',
-                        y='cantidad',
-                        text='porcentaje',  # muestra el porcentaje encima de la barra
+                        x='cantidad',        # 👈 cantidad en X
+                        y='institucion',     # 👈 institución en Y
+                        text='porcentaje',
                         color='porcentaje',
+                        orientation='h',     # 👈 barras horizontales
                         color_continuous_scale=px.colors.sequential.Viridis,
                         title="Cantidad y porcentaje de personas por institución"
                         
                     )
 
+
                     # Ajustes visuales
-                    fig_inst.update_traces(texttemplate='%{text}%')
-                    fig_inst.update_layout(
-                        xaxis_title="Institución",
-                        yaxis_title="Cantidad de personas",
-                        coloraxis_showscale=True
+                    fig_inst.update_traces(
+                        texttemplate='%{text}%',
+                        textposition='inside'   
                     )
 
-                    #st.plotly_chart(fig_inst, width='stretch', key="inst_cantidad_porcentaje")
+                    fig_inst.update_layout(
+                        xaxis_title="C.de personas ",
+                        yaxis_title="Institución",
+                        coloraxis_showscale=False 
+                        
+                    )
+
+                    fig_inst.update_yaxes(automargin=True)  # 👈 evita que se corten los nombres largos
                     st.plotly_chart(fig_inst, key="inst_cantidad_porcentaje")
 
 
@@ -869,6 +907,12 @@ with tabs[2]:
                     color_discrete_sequence=px.colors.qualitative.Bold
                 )
                 #st.plotly_chart(fig_otro, width='stretch')
+                fig_otro.update_traces(
+                   textposition='inside'  # 👈 dentro de la barra
+                    )
+                
+                fig_otro.update_layout(coloraxis_showscale=False)
+
                 st.plotly_chart(fig_otro)
         # ------------------------
         # Universidades / Fecha finalización
@@ -888,6 +932,13 @@ with tabs[2]:
                     color_discrete_sequence=px.colors.qualitative.Pastel
                 )
                 #st.plotly_chart(fig_uni, width='stretch')
+                
+                fig_uni.update_traces(
+                   textposition='inside'  # 👈 dentro de la barra
+                    )
+                
+                fig_uni.update_layout(coloraxis_showscale=False)
+
                 st.plotly_chart(fig_uni)
         with col6:
             if 'fec_finalizootracarrera' in df_tab.columns:
@@ -918,7 +969,8 @@ with tabs[2]:
                             x='decada',
                             y='cantidad',
                             text='cantidad',
-                            title="Cantidad de personas por década de finalizaciónde otra carrera",
+                            title="Distribución por década de finalización (otra carrera)",
+                                  
                             color='cantidad',
                             color_continuous_scale=px.colors.sequential.Plasma,
                             height=500
@@ -927,10 +979,14 @@ with tabs[2]:
                         fig_year.update_traces(textposition='outside')
                         fig_year.update_layout(
                             xaxis_title="Década",
-                            yaxis_title="Cantidad de personas"
+                            yaxis_title="Cantidad de personas",
+                            coloraxis_showscale=False
                         )
 
+
                         #st.plotly_chart(fig_year, width='stretch')
+                        #fig_year.update_layout(showlegend=False)
+
                         st.plotly_chart(fig_year)
                     else:
                         st.write("No hay datos válidos de años de finalización de otra carrera.")
@@ -938,56 +994,56 @@ with tabs[2]:
 
     # Lista de columnas de idiomas
 
-    idiomas = ['ingles', 'frances', 'italiano', 'portugues', 'aleman', 'otroidioma']
+        idiomas = ['ingles', 'frances', 'italiano', 'portugues', 'aleman', 'otroidioma']
 
-    # Transformar el dataframe a formato largo (long format)
-    df_idiomas_long = pd.DataFrame()
+        # Transformar el dataframe a formato largo (long format)
+        df_idiomas_long = pd.DataFrame()
 
-    for col in idiomas:
-        temp = df_tab[[col]].dropna().copy()
-        temp[col] = temp[col].str.split(';')  # separar valores múltiples
-        temp = temp.explode(col)              # una fila por valor
-        temp['idioma'] = col
-        temp.rename(columns={col:'nivel'}, inplace=True)
-        df_idiomas_long = pd.concat([df_idiomas_long, temp], axis=0)
+        for col in idiomas:
+            temp = df_tab[[col]].dropna().copy()
+            temp[col] = temp[col].str.split(';')  # separar valores múltiples
+            temp = temp.explode(col)              # una fila por valor
+            temp['idioma'] = col
+            temp.rename(columns={col:'nivel'}, inplace=True)
+            df_idiomas_long = pd.concat([df_idiomas_long, temp], axis=0)
 
-    # Contar frecuencia de cada nivel por idioma
-    df_idiomas_count = df_idiomas_long.groupby(['idioma', 'nivel']).size().reset_index(name='count')
+        # Contar frecuencia de cada nivel por idioma
+        df_idiomas_count = df_idiomas_long.groupby(['idioma', 'nivel']).size().reset_index(name='count')
 
-    # Ordenar idiomas por total
-    totales = df_idiomas_count.groupby('idioma')['count'].sum().reset_index()
-    totales = totales.sort_values('count', ascending=False)
-    df_idiomas_count['idioma'] = pd.Categorical(df_idiomas_count['idioma'], categories=totales['idioma'], ordered=True)
+        # Ordenar idiomas por total
+        totales = df_idiomas_count.groupby('idioma')['count'].sum().reset_index()
+        totales = totales.sort_values('count', ascending=False)
+        df_idiomas_count['idioma'] = pd.Categorical(df_idiomas_count['idioma'], categories=totales['idioma'], ordered=True)
 
-    # Ordenar niveles dentro de cada idioma
-    niveles_ordenados = (
-        df_idiomas_count.groupby('nivel')['count'].sum()
-        .sort_values(ascending=False)
-        .index
-    )
-    df_idiomas_count['nivel'] = pd.Categorical(df_idiomas_count['nivel'], categories=niveles_ordenados, ordered=True)
+        # Ordenar niveles dentro de cada idioma
+        niveles_ordenados = (
+            df_idiomas_count.groupby('nivel')['count'].sum()
+            .sort_values(ascending=False)
+            .index
+        )
+        df_idiomas_count['nivel'] = pd.Categorical(df_idiomas_count['nivel'], categories=niveles_ordenados, ordered=True)
 
-    # Gráfico de barras apiladas
-    fig = px.bar(
-        df_idiomas_count,
-        x='idioma',
-        y='count',
-        color='nivel',
-        text='count',
-        title='Competencia por idioma',
-        color_discrete_sequence=px.colors.qualitative.Set3
-    )
+        # Gráfico de barras apiladas
+        fig = px.bar(
+            df_idiomas_count,
+            x='idioma',
+            y='count',
+            color='nivel',
+            text='count',
+            title='Competencia por idioma',
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
     
-    # Ajustar título del eje Y
-    fig.update_layout(
-        yaxis_title="Cantidad de agentes",
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)'
-    )
+        # Ajustar título del eje Y
+        fig.update_layout(
+            yaxis_title="Cantidad de agentes",
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)'
+        )
     
-    fig.update_traces(textposition='outside')
-    #st.plotly_chart(fig, width='stretch')
-    st.plotly_chart(fig)
+        fig.update_traces(textposition='outside')
+        #st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig)
 
 
         
@@ -1002,35 +1058,6 @@ with tabs[3]:
     # ---------------------------------
     #df_tab = pd.read_csv("limpio.csv")  # o tu DataFrame ya cargado
     st.title(" Becas y Doctorados")
-
-    # ---------------------------------
-    # Filtros interactivos
-    # ---------------------------------
-    # ---- Filtros dentro de la pestaña, ocultos por defecto ----
-#    with st.expander("Mostrar filtros de selección", expanded=False):
-#        universidades = df_tab['uni_doctorado'].dropna().unique()
-#        estado_beca = df_tab['estado_becadoc'].dropna().unique()
-#        pais_ext = df_tab['pais_becaext'].dropna().unique()
-
-#        uni_sel = st.multiselect("Seleccionar universidades:", universidades, default=universidades)
-#        estado_sel = st.multiselect("Seleccionar estado de beca:", estado_beca, default=estado_beca)
-#        pais_sel = st.multiselect("Seleccionar país de beca externa:", pais_ext, default=pais_ext)
-
-#    # Si no se selecciona nada (porque el expander está cerrado), se toman todos los valores
-#    if 'uni_sel' not in locals():
-#        uni_sel = universidades
-#    if 'estado_sel' not in locals():
-#        estado_sel = estado_beca
-#    if 'pais_sel' not in locals():
-#        pais_sel = pais_ext
-
-    # Filtrar DataFrame según selección
-#    df_filtrado = df_tab[
-#        df_tab['uni_doctorado'].isin(uni_sel) &
-#        df_tab['estado_becadoc'].isin(estado_sel) &
-#        df_tab['pais_becaext'].isin(pais_sel)
-#    ]
-
 
     # ---------------------------------
     # Layout de columnas
@@ -1087,44 +1114,15 @@ with tabs[3]:
             )
 
         fig_unidoc.update_traces(textposition='outside')
+        fig_unidoc.update_layout(coloraxis_showscale=False)
         #st.plotly_chart(fig_unidoc, width='stretch')
         st.plotly_chart(fig_unidoc)
            
     ##
-    col3, col4 = st.columns(2)
-    with col3:
-        # Becas en el extranjero por país
-        # 1️⃣ Filtrar filas con valor
-        df_ext = df_filtrado.dropna(subset=['pais_becaext'])
-
-        if not df_ext.empty:
-            # 2️⃣ Separar los países por ';' y aplanar la lista
-            paises = df_ext['pais_becaext'].str.split(';').explode().str.strip()
-
-            # 3️⃣ Contar cada país
-            ext_count = paises.value_counts().reset_index()
-            ext_count.columns = ['País', 'Cantidad']
-
-            # 4️⃣ Crear gráfico
-            fig_ext = px.bar(
-                ext_count,
-                x='Cantidad',
-                y='País',
-                orientation='h',
-                text='Cantidad',
-                title="Becas externas por país",
-                color='Cantidad',
-                color_continuous_scale=px.colors.sequential.Magma,
-                height=400
-            )
-
-            fig_ext.update_traces(textposition='outside')
-
-            #st.plotly_chart(fig_ext, width='stretch')
-            st.plotly_chart(fig_ext)
-    # ---- Gráfico ancho debajo ----
+    col3, col4= st.columns(2)
+        # ---- Gráfico ancho debajo ----
     # Año de inicio de doctorado
-    with col4:
+    with col3:
         if 'fec_ini_doc' in df_filtrado.columns:
             df_year = pd.to_numeric(df_filtrado['fec_ini_doc'], errors='coerce').dropna().astype(int)
             if not df_year.empty:
@@ -1142,16 +1140,84 @@ with tabs[3]:
                     color_continuous_scale=px.colors.sequential.Plasma,
                     height=400
                 )
+                fig_year.update_layout(coloraxis_showscale=False)
                 fig_year.update_traces(textposition='outside')
                 #st.plotly_chart(fig_year, width='stretch')
                 st.plotly_chart(fig_year)
+    
+    # Año de inicio de doctorado
+    with col4:
+        if 'fec_defensa' in df_filtrado.columns:
+            df_year1 = (
+                pd.to_datetime(df_filtrado['fec_defensa'], errors='coerce')
+                .dt.year
+                .dropna()
+                .astype(int)
+            )
+
+            if not df_year1.empty:
+                df_count_year = df_year1.value_counts().reset_index()
+                df_count_year.columns = ['Año', 'Cantidad']
+                df_count_year = df_count_year.sort_values('Año')
+
+                fig_defensa = px.bar(
+                    df_count_year,
+                    x='Año',
+                    y='Cantidad',
+                    text='Cantidad',
+                    title="Cantidad de becas defendidas por año",
+                    color='Cantidad',
+                    color_continuous_scale=px.colors.sequential.Plasma,
+                    height=400
+                )
+
+                fig_defensa.update_layout(coloraxis_showscale=False)
+                fig_defensa.update_traces(textposition='outside')
+
+                #st.plotly_chart(fig_defensa, use_container_width=True)
+                st.plotly_chart(fig_defensa)
+
+    #with col5:
+        # Becas en el extranjero por país
+        # 1️⃣ Filtrar filas con valor
+    df_ext = df_filtrado.dropna(subset=['pais_becaext'])
+
+    if not df_ext.empty:
+        # 2️⃣ Separar los países por ';' y aplanar la lista
+        paises = df_ext['pais_becaext'].str.split(';').explode().str.strip()
+
+        # 3️⃣ Contar cada país
+        ext_count = paises.value_counts().reset_index()
+        ext_count.columns = ['País', 'Cantidad']
+
+            # 4️⃣ Crear gráfico
+        fig_ext = px.bar(
+                ext_count,
+                x='Cantidad',
+                y='País',
+                orientation='h',
+                text='Cantidad',
+                title="Becas  por país",
+                color='Cantidad',
+                color_continuous_scale=px.colors.sequential.Magma,
+                height=400
+        )
+        fig_ext.update_layout(coloraxis_showscale=False)
+        fig_ext.update_traces(textposition='outside')
+
+            #st.plotly_chart(fig_ext, width='stretch')
+        st.plotly_chart(fig_ext)
+
+    
+    
        # -----------------------
        # Tabla con temas e investigador
        # -----------------------
     if 'tema_investigacion' in df_filtrado.columns and 'director_doctorado' in df_filtrado.columns:
         df_temas = df_filtrado[['tema_investigacion','nombre', 'director_doctorado']].dropna()
         st.subheader("Tabla de temas de investigación e investigador")
-        st.dataframe(df_temas.reset_index(drop=True), width='stretch')
+        #st.dataframe(df_temas.reset_index(drop=True), width='stretch')
+        st.dataframe(df_temas.reset_index(drop=True))
 
     
     # Temas de investigación Nube
@@ -1201,7 +1267,9 @@ with tabs[3]:
             # Mostrar
             st.subheader("Nube de palabras de temas de investigación")
             plt.figure(figsize=(15, 7))
-            plt.imshow(wordcloud, interpolation='bilinear')
+            #plt.imshow(wordcloud, interpolation='bilinear')
+            plt.imshow(wordcloud.to_array(), interpolation='bilinear')
+
             plt.axis('off')
             st.pyplot(plt)
         else:
@@ -1221,11 +1289,20 @@ with tabs[4]:
     # Copiar DataFrame filtrado o usar df_tab
     # -----------------------
     #df_becas = df_tab.copy()
+    ###
+    # Después de aplicar filtros
+    df_tab = df_filtrado.copy()
+
+    if df_tab.empty:
+        st.warning("No hay datos disponibles después de aplicar los filtros.")
+        st.stop()
+
+    ###
     df_becas= df_filtrado.copy()
     
     todas_columnas = []
     categorias = {
-        "Datos Becas finalizadas": ['nombre','director_doctorado','director_lugar',
+        "Datos Becas fecha inicio-defensa ": ['nombre','director_doctorado','director_lugar',
  'fec_ini_doc', 'fec_defensa']
     }
 
@@ -1234,10 +1311,21 @@ with tabs[4]:
 
     # --- Filtrar solo las que existen en el df ---
     todas_columnas = [c for c in todas_columnas if c in df_tab.columns]
+    df_mostrar = df_tab[todas_columnas].dropna(subset=['fec_defensa'])
+
+    df_mostrar = (
+        df_tab[todas_columnas]
+        .dropna(subset=['fec_defensa'])
+        .sort_values(by='nombre')
+    )
+
+    with st.expander("Datos Becas finalizadas", expanded=False):
+        st.dataframe(df_mostrar)
+
 
     # --- Mostrar tabla dentro de un expander ---
-    with st.expander("Datos Becas finalizadas", expanded=False):
-        st.dataframe(df_tab[todas_columnas])
+    #with st.expander("Datos Becas finalizadas", expanded=False):
+    #    st.dataframe(df_tab[todas_columnas])
 
 
     # -----------------------
@@ -1329,7 +1417,8 @@ with tabs[4]:
 
         # Mostrar los valores encima de cada barra
         fig_carrera.update_traces(texttemplate='%{text:.1f}', textposition='inside',)
-        fig_carrera.update_layout(coloraxis_colorbar_tickformat=".1f")
+        fig_carrera.update_layout(coloraxis_colorbar_tickformat=".1f",coloraxis_showscale=False)
+
 
         #st.plotly_chart(fig_carrera, width='stretch')
         st.plotly_chart(fig_carrera)
@@ -1358,11 +1447,71 @@ with tabs[4]:
                 color_continuous_scale=px.colors.sequential.Viridis
             )
             fig_uni.update_traces(texttemplate='%{text:.1f}', textposition='outside')
-            fig_uni.update_layout(coloraxis_colorbar_tickformat=".1f")
+            fig_uni.update_layout(coloraxis_colorbar_tickformat=".1f",coloraxis_showscale=False)
+            fig_uni.update_yaxes(automargin=True)
+            fig_uni.update_layout(
+                margin=dict(l=220, r=20, t=60, b=20)
+            )
+
             #st.plotly_chart(fig_uni, width='stretch')
             st.plotly_chart(fig_uni)
+    ###
+    st.subheader("Detalle de becas finalizadas")
+
+# ---------- DataFrame base ----------
+    df_detalle = df_duracion[[
+        'nombre',
+        'fec_ini_doc',
+        'fec_defensa',
+        'doctorado',
+        'uni_doctorado'
+    ]].dropna(subset=['fec_defensa']).copy()
+
+# Limpiar strings para evitar problemas de espacios
+    df_detalle['doctorado'] = df_detalle['doctorado'].astype(str).str.strip()
+    df_detalle['uni_doctorado'] = df_detalle['uni_doctorado'].astype(str).str.strip()
+
+# ---------- Crear columna duración en años ----------
+    df_detalle['duracion'] = (df_detalle['fec_defensa'] - df_detalle['fec_ini_doc']).dt.days / 365.25
+    df_detalle['duracion'] = df_detalle['duracion'].round(2)  # redondeo opcional
+
+# ---------- Listas de opciones ----------
+    doctorado_options = ["Todos"] + sorted(df_detalle['doctorado'].dropna().unique())
+    uni_options = ["Todas"] + sorted(df_detalle['uni_doctorado'].dropna().unique())
+
+# ---------- Filtros ----------
+    col1, col2 = st.columns(2)
+
+    with col1:
+        doctorado_sel = st.selectbox("Filtrar por doctorado", doctorado_options)
+
+    with col2:
+        uni_sel = st.selectbox("Filtrar por universidad", uni_options)
+
+# ---------- Aplicar filtros ----------
+    df_filtrado_tabla = df_detalle.copy()
+
+    if doctorado_sel != "Todos":
+        df_filtrado_tabla = df_filtrado_tabla[df_filtrado_tabla['doctorado'] == doctorado_sel]
+
+    if uni_sel != "Todas":
+        df_filtrado_tabla = df_filtrado_tabla[df_filtrado_tabla['uni_doctorado'] == uni_sel]
+
+# ---------- Mostrar ----------
+    with st.expander(f"Ver detalle de becas ({len(df_filtrado_tabla)} registros)", expanded=False):
+        st.dataframe(
+            df_filtrado_tabla.sort_values('nombre')[[
+                'nombre', 'fec_ini_doc', 'fec_defensa','duracion', 'doctorado', 'uni_doctorado'
+            ]],
+            use_container_width=True
+        )
+
+    st.caption(f"Registros mostrados: {len(df_filtrado_tabla)}")
 
 
+
+
+    ###
     # 5. Visualizaciones adicionales
     st.subheader("Visualizaciones adicionales")
 
@@ -1409,8 +1558,8 @@ with tabs[4]:
                         title=f"Distribución por {campo}",
                         color_discrete_sequence=paleta
                     )
-                    col1.plotly_chart(fig, width='stretch')
-
+                    #col1.plotly_chart(fig, width='stretch')
+                    col1.plotly_chart(fig)
                 # cant_intentos -> barras verticales
                 elif campo == 'cant_intentos':
                     fig = px.bar(
@@ -1434,8 +1583,9 @@ with tabs[4]:
                     )
     
                     #fig.update_traces(texttemplate='%{text}', textposition='outside')
-                    col2.plotly_chart(fig, width='stretch')
-
+                    #col2.plotly_chart(fig, width='stretch')
+                    fig.update_layout(coloraxis_showscale=False)
+                    col2.plotly_chart(fig)
             else:
                 # Gráficos normales tipo barra horizontal
                 if campo !='estado':
@@ -1450,6 +1600,7 @@ with tabs[4]:
                         color_continuous_scale=paleta
                     )
                     fig.update_traces(texttemplate='%{text}', textposition='outside')
+                    fig.update_layout(coloraxis_showscale=False)
                     #st.plotly_chart(fig, width='stretch')
                     st.plotly_chart(fig)
 
@@ -1460,7 +1611,7 @@ with tabs[5]:
     st.header("Becas PosDoc. y Externas")
   
 
-    st.write("Análisis de Becas Doctorales y Posdoctorales")
+    #st.write("Análisis de Becas Doctorales y Posdoctorales")
 
     # ---------------------------
     # 1️⃣ Campos simples (barras o tortas)
@@ -1480,6 +1631,7 @@ with tabs[5]:
         #'beca_posdoc': px.colors.sequential.Viridis,
         'financia_becaposdoc': px.colors.sequential.Plasma,
         'lugar_becaposdoc': px.colors.sequential.Cividis,
+        #'periodo_becaposdoc': px.colors.sequential.Magma,
         #'beca_resultadoneg': px.colors.sequential.Magma,
         'contacto_red': px.colors.sequential.Plasma,
     }
@@ -1487,13 +1639,69 @@ with tabs[5]:
     df_tab = df_filtrado.copy()
 
     # ----- Gráficos de campos simples -----
-    with st.expander("Gráficos de campos simples", expanded=True):
 
+    with st.expander("Gráficos de campos simples", expanded=True):
+        col1, col2 = st.columns(2)
+        campos_barras1 = ['periodo_becaposdoc']
+
+        paletas_barras1 = {
+            'periodo_becaposdoc': px.colors.sequential.Magma,
+          }
+
+        for campo in campos_barras1:
+            if campo in df_tab.columns and not df_tab[campo].dropna().empty:
+                # Gráfico de barras
+                df_count = df_tab[campo].value_counts().reset_index()
+                df_count.columns = [campo, 'count']
+
+                fig = px.bar(
+                    df_count,
+                    x='count',
+                    y=campo,
+                    orientation='h',
+                    #text='count',
+                    title=f"Distribución por {campo}",
+                    color='count',
+                    color_continuous_scale=paletas_barras1.get(campo, px.colors.sequential.Viridis)
+                )
+
+                #fig.update_traces(texttemplate='%{text}', textposition='inside')
+                fig.update_layout(
+                    yaxis=dict(automargin=True),
+                    coloraxis_showscale=False,
+                    height=500
+                )
+
+                col1.plotly_chart(fig, use_container_width=True)
+
+                # Tabla con nombres
+                df_tabla = df_tab[['nombre', campo]].dropna(subset=[campo])
+                df_tabla = df_tabla.sort_values('nombre')
+                col2.dataframe(df_tabla, height=500, use_container_width=True)
+
+        campos_barras = ['financia_becaposdoc', 'lugar_becaposdoc',
+                     'contacto_red']
+
+
+        paletas_barras = {
+            #'beca_posdoc': px.colors.sequential.Viridis,
+            'financia_becaposdoc': px.colors.sequential.Plasma,
+            'lugar_becaposdoc': px.colors.sequential.Cividis,
+            #'periodo_becaposdoc': px.colors.sequential.Magma,
+            #'beca_resultadoneg': px.colors.sequential.Magma,
+            'contacto_red': px.colors.sequential.Plasma,
+        }
+
+        df_tab = df_filtrado.copy()
+
+
+
+#########3
         # --- resto de los campos en columnas, excepto contacto_red ---
         campos_restantes = [c for c in campos_barras if c != 'contacto_red']
         #campos_restantes = [c for c in campos_barras ]
         for i in range(0, len(campos_restantes), 2):
-            cols = st.columns([0.5, 0.5], gap="medium")
+            cols = st.columns([0.5, 0.5], gap="small")
             for j, campo in enumerate(campos_restantes[i:i+2]):
                 if campo in df_tab.columns and not df_tab[campo].dropna().empty:
                     df_count = df_tab[campo].value_counts().reset_index()
@@ -1515,7 +1723,7 @@ with tabs[5]:
                             domain=dict(x=[0.2, 0.8], y=[0.2, 0.8])
                         )
                         fig.update_layout(
-                            margin=dict(l=20, r=20, t=40, b=20),
+                            margin=dict(l=20, r=10, t=40, b=20),
                             legend=dict(
                                 orientation="h",
                                 y=-0.1,
@@ -1531,15 +1739,20 @@ with tabs[5]:
                             y=campo,
                             orientation='h',
                             text='count',
+                            
+                            
                             title=f"Distribución por {campo}",
                             color='count',
                             color_continuous_scale=paletas_barras.get(campo, px.colors.sequential.Viridis)
                         )
-                        fig.update_traces(texttemplate='%{text}', textposition='outside')
-                        fig.update_layout(yaxis=dict(automargin=True))
+                        fig.update_traces(texttemplate='%{text}', textposition='inside')
+                        
+
+                        fig.update_layout(yaxis=dict(automargin=True),coloraxis_showscale=False)
 
                     # Mostrar gráfico en columna con key único
-                    cols[j].plotly_chart(fig, use_container_width=True, height=500, key=f"{campo}_{i}_{j}")
+                    #cols[j].plotly_chart(fig, use_container_width=True, height=500, key=f"{campo}_{i}_{j}")
+                    cols[j].plotly_chart(fig,height=500, key=f"{campo}_{i}_{j}")
 
         # --- contacto_red como dona al final, ancho completo ---
             if 'contacto_red' in df_tab.columns and not df_tab['contacto_red'].dropna().empty:
@@ -1556,17 +1769,20 @@ with tabs[5]:
                 )
                 fig.update_traces(
                     domain=dict(x=[0.2, 0.8], y=[0.2, 0.8]),
+                    
+                    #domain=dict(x=[0.2, 0.8], y=[0.25, 0.75]),
+
                     hovertemplate="%{label}: %{value}<extra></extra>"
                 )
                 fig.update_layout(
                     width=1000,
-                    height=700,
-                    margin=dict(l=10, r=10, t=40, b=10),
+                    height=600,
+                    margin=dict(l=10, r=10, t=20, b=10),
                     legend_title_text='',
                     legend=dict(
                         orientation="h",
                         yanchor="bottom",
-                        y=-0.2,
+                        y=-0.05,
                         xanchor="center",
                         x=0.5
                     )
@@ -1648,7 +1864,8 @@ with tabs[5]:
                 df_dir['tema'] = df_dir['tema'].str.strip()
                 
                 st.subheader("Tabla de Temas")
-                st.dataframe(df_dir, use_container_width=True)    
+                #st.dataframe(df_dir, use_container_width=True)    
+                st.dataframe(df_dir)    
 
 
 
@@ -1708,7 +1925,18 @@ with tabs[5]:
         node_colors = ["#a6cee3"]*len(becas) + ["#b2df8a"]*len(paises) + ["#fdbf6f"]*len(instituciones)
 
         # Colores de enlaces según valor
-        max_value = max([l["value"] for l in link_data])
+        #max_value = max([l["value"] for l in link_data])
+        
+        ##
+        if not link_data:
+            st.warning("No hay relaciones para mostrar con los filtros seleccionados.")
+            st.stop()
+
+        max_value = max(l["value"] for l in link_data)
+
+
+
+        ##
         link_colors = [
             f"rgba(100,149,237,{l['value']/max_value * 0.6 + 0.2})" if l["source"] < len(becas) else
             f"rgba(144,238,144,{l['value']/max_value * 0.6 + 0.2})"
@@ -1755,35 +1983,78 @@ with tabs[5]:
 
     
         ###    
-    campos_periodo = ['periodo_becaposdoc', 'periodo_ini_becaext', 'periodo_fina_beca']
+    campos_periodo = ['periodo_ini_becaext', 'periodo_fina_beca']
+
+
+    def contar_multivalor(df, columna, separador=';'):
+        return (
+            df[[columna]]
+            .dropna()
+            .assign(**{
+                columna: df[columna]
+                .astype(str)
+                .str.split(separador)
+             })
+            .explode(columna)
+            .assign(**{
+                columna: lambda d: d[columna].str.strip()
+            })
+            .value_counts(subset=[columna])
+            .reset_index(name='count')
+        )
+
+    campos_periodo = [
+        
+        'periodo_ini_becaext',
+        'periodo_fina_beca'
+        #'periodo_becaposdoc',
+    ]
 
     with st.expander("Gráficos de periodos", expanded=False):
-        cols = st.columns(2)  # 👉 dos columnas
+        cols = st.columns(2)
+
         for i, campo in enumerate(campos_periodo):
             if campo in df_tab.columns and not df_tab[campo].dropna().empty:
-                df_count = df_tab[campo].value_counts().reset_index()
-                df_count.columns = [campo, 'count']
-                df_count = df_count.sort_values(campo)  # orden cronológico
+
+                # 👇 CONTAR VALORES SEPARADOS POR ;
+                df_count = contar_multivalor(df_tab, campo)
+
+                # Orden cronológico
+                df_count = df_count.sort_values(campo)
 
                 fig = px.bar(
                     df_count,
-                    x=campo,
-                    y='count',
+                    x='count',
+                    y=campo,
+                    orientation='h',
                     text='count',
                     title=f"Distribución por {campo}",
                     color='count',
                     color_continuous_scale=px.colors.sequential.Plasma
                 )
-                fig.update_traces(texttemplate='%{text}', textposition='outside')
 
-                # 👉 enviar gráfico a la columna correspondiente
-                cols[i % 2].plotly_chart(fig, width='stretch')
+                fig.update_traces(
+                    texttemplate='%{text}',
+                    textposition='inside',
+                    width=0.5
+                )
+
+                
+                
+                fig.update_layout(
+                    #height=alto,
+                    bargap=0.5,
+                    coloraxis_showscale=False,
+                    yaxis=dict(automargin=True)
+                )
+
+
+
+
+                cols[i % 2].plotly_chart(fig)
 
 
     
-
-
-
 
 
 # ---------- Docencia y Capacitación ----------
@@ -1836,18 +2107,47 @@ with tabs[6]:
                 title=f"Distribución por {var}"
             )
             fig.update_traces(texttemplate='%{text}', textposition='outside')
+            fig.update_layout(coloraxis_showscale=False)
+    
             fig.update_layout(height=max(400, num_categorias*40), yaxis=dict(automargin=True))
 
             if num_categorias > 6:
                 # Muchas categorías → gráfico ancho completo + tabla al lado
                 cols = st.columns([3,1])
-                cols[0].plotly_chart(fig, width='stretch', key=f"{var}_full")
-                cols[1].dataframe(df_count, height=400, width='stretch')
+                #cols[0].plotly_chart(fig, width='stretch', key=f"{var}_full")
+                #cols[1].dataframe(df_count, height=400)
+            
+                cols[0].plotly_chart(fig, height=400, key=f"{var}_col")
+                #_full -col
+            
+                ##
+               
+                #cols[1].dataframe(df_count, height=600)
+                 # Mostrar tabla con los datos de cada persona: nombre + variable
+                df_tabla = df_tab[['nombre', var]].dropna(subset=[var])
+                df_tabla = df_tabla.sort_values('nombre')  # 🔹 ordenar por nombre
+        
+                cols[1].dataframe(df_tabla, height=600)
+
+            
+            
             else:
                 # Pocas categorías → columnas de 2
                 cols = st.columns(2)
-                cols[0].plotly_chart(fig, width='stretch', key=f"{var}_col")
-                cols[1].dataframe(df_count, width='stretch')
+                #cols[0].plotly_chart(fig, width='stretch', key=f"{var}_col")
+                #cols[1].dataframe(df_count)
+
+                cols[0].plotly_chart(
+                    fig,height=400,key=f"{var}_col")
+                    ######ver
+                df_tabla = df_tab[['nombre', var]].dropna(subset=[var])
+                df_tabla = df_tabla.sort_values('nombre')  # 🔹 ordenar por nombre
+        
+                cols[1].dataframe(df_tabla, height=400)
+
+
+                #cols[1].dataframe(
+                #    df_count,height=400)
 
 
     # ---------- Gráficos de dona ----------
@@ -1875,15 +2175,16 @@ with tabs[6]:
                 #    legend=dict(font=dict(size=10) ,orientation="v", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
                 #    margin=dict(l=10, r=10, t=40, b=10)
                 #)
+                
                 fig.update_layout(
-                width=1000,      
-                height=600,
-                margin=dict(l=10, r=10, t=40, b=10),
+                width=800,      
+                height=400,
+                margin=dict(l=10, r=10, t=40, b=20),  # aumentar el margen inferior un poco
                 legend_title_text='',
                 legend=dict(
                     orientation="h",
                     yanchor="bottom",
-                    y=-0.2,
+                    y=-0.05,     # 👈 acercar la leyenda a la dona
                     xanchor="center",
                     x=0.5
                     )
@@ -1891,10 +2192,12 @@ with tabs[6]:
 
 
 
+
+
                 fig.update_traces(hovertemplate="%{label}: %{value}<extra></extra>")
 
-                cols[j].plotly_chart(fig, width='stretch', key=f"{var}_dona_{k}_{j}")
-    
+                #cols[j].plotly_chart(fig, width='stretch', key=f"{var}_dona_{k}_{j}")
+                cols[j].plotly_chart(fig, key=f"{var}_dona_{k}_{j}")
              
 
             #st.plotly_chart(fig, width='stretch')
@@ -1904,8 +2207,12 @@ with tabs[6]:
 
 with tabs[7]:
     st.header("Revistas y Postu.Becas Ext.")
+    df_tab = df_filtrado.copy()
+
     cols_prod = ['Nombre','Publicaciones','LineaInvestigacion','ParticipacionSTAN']
     df_show = [col for col in cols_prod if col in df_filtrado.columns]
+    
+
     #st.dataframe(df_filtrado[df_show])
 
     ##
@@ -1921,18 +2228,24 @@ with tabs[7]:
     #cols = st.columns(2)  # dos columnas para gráficos
     
 
-    cols = st.columns(2, gap="medium")  # dos columnas iguales
+    cols = st.columns(2, gap="small")  # dos columnas iguales
 
     for i, col in enumerate(['conoce_revistas', 'revistas']):
-        if col in df.columns:
-            counts = df[col].value_counts(dropna=False).reset_index()
+        if col in df_tab.columns:
+            counts = df_tab[col].value_counts(dropna=False).reset_index()
             counts.columns = [col, 'count']
 
             with cols[i % 2]:  # alterna columnas
                 if col == 'revistas':
                     # ---------- Tabla ----------
                     #st.subheader("Tabla de Revistas")
-                    st.dataframe(counts, height=400)  # altura igual al gráfico
+                    #st.dataframe(counts, height=400)  # altura igual al gráfico
+                # Mostrar tabla con nombre + variable
+                    df_tabla = df_tab[['nombre', col]].dropna(subset=[col])
+                    df_tabla = df_tabla.sort_values('nombre')  # ordenar por nombre
+                    st.dataframe(df_tabla, height=400)
+
+
 
                     # ---------- Barra horizontal ----------
                     #fig = px.bar(
@@ -1987,17 +2300,21 @@ with tabs[7]:
                     st.plotly_chart(fig,height=400)
                 
     #cols = st.columns(2)  # dos columnas para gráficos
-    cols = st.columns(2, gap="medium")  # dos columnas iguales
+    cols = st.columns(2, gap="small")  # dos columnas iguales
     for i, col in enumerate(['conoce_stan', 'si_stan', 'postular_becaexterior','criterios_decision']):
-        if col in df.columns:
-            counts = df[col].value_counts(dropna=False).reset_index()
+        if col in df_tab.columns:
+            counts = df_tab[col].value_counts(dropna=False).reset_index()
             counts.columns = [col, 'count']
 
             if col == 'si_stan':
                 # ---------- Mostrar tabla ----------
                 with cols[i % 2]:  # alterna entre la col 0 y 1
                   #  st.subheader("Tabla de Stan")
-                    st.dataframe(counts, use_container_width=True)
+                    #st.dataframe(counts, use_container_width=True)
+                    #st.dataframe(counts)
+                    df_tabla = df_tab[['nombre', col]].dropna(subset=[col])
+                    df_tabla = df_tabla.sort_values('nombre')  # ordenar por nombre
+                    st.dataframe(df_tabla, height=400)
 
                     # ---------- Barra horizontal ----------
                     #fig = px.bar(
@@ -2018,7 +2335,11 @@ with tabs[7]:
                 # ---------- Solo tabla ----------
                 with cols[i % 2]:
                     #st.subheader("Tabla de Criterios de Decisión")
-                    st.dataframe(counts, use_container_width=True)
+                    #st.dataframe(counts, use_container_width=True)
+                    #st.dataframe(counts)
+                    df_tabla = df_tab[['nombre', col]].dropna(subset=[col])
+                    df_tabla = df_tabla.sort_values('nombre')  # ordenar por nombre
+                    st.dataframe(df_tabla, height=400)
 
             else:
                 # ---------- Dona ----------
