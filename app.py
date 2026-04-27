@@ -2060,17 +2060,14 @@ with tabs[6]:
 ###########27/04/2026
 #########
 ###########
-
-    st.set_page_config(layout="wide")
-
+    st.header("Becas Doc.-PosDoc. inio-fin")
+    #st.set_page_config(layout="wide")
+    df = pd.read_excel("guillermocenso.xlsx")
     ALTO_GRAFICOS = 450
 # -------------------------------
 # Cargar datos
 # -------------------------------
-#df = pd.read_csv("guilermocenso.csv")
-
-
-    df = pd.read_excel("guillermocenso.xlsx")
+    
 
     #print(df.head())
 # -------------------------------
@@ -2466,16 +2463,7 @@ with tabs[6]:
     col_fig5, col_tabla5 = st.columns([2, 1])
 
     with col_fig5:
-        fig5 = px.timeline(          # ← esta línea faltaba
-            df_posdoc,
-            x_start="anio_ini_fecha",
-            x_end="anio_fin_fecha",
-            y="nombre",
-            title="Duración de becas posdoctorales por becario",
-            color_discrete_sequence=["#1D9E75"]
-        )
-    ##########
-
+        
         fig5 = px.timeline(
             df_posdoc,
             x_start="anio_ini_fecha",
@@ -2554,8 +2542,8 @@ with tabs[6]:
 
 # ---------- Docencia y Capacitación ----------
 with tabs[7]:
-    st.header("Becas Doc.-PosDoc. inio-fin")
-    
+    #st.header("Becas Doc.-PosDoc. inio-fin")
+    #df = pd.read_excel("guillermocenso.xlsx")
     df_tab = df_filtrado.copy()
     cols_doc = ['Nombre','Nivelinstitucion','Sectorinstitucion','HorasSemanales','FormacionGenero','DetalleFormacion']
     df_show = [col for col in cols_doc if col in df_filtrado.columns]
