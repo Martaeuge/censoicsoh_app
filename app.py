@@ -287,7 +287,7 @@ with tabs[0]:
 
 
     #st.plotly_chart(fig_lug, use_container_width=True)
-    st.plotly_chart(fig_lug)
+    st.plotly_chart(fig_lug,width="stretch")
 
     # --- Mapa a todo el ancho ---
     #st.subheader("Mapa de nacimiento")
@@ -947,7 +947,7 @@ with tabs[2]:
                     df_tab['anio'] = pd.to_numeric(df_tab['fec_finalizootracarrera'], errors='coerce')
 
                     # Filtrar filas con años válidos
-                    df_year = df_tab.dropna(subset=['anio'])
+                    df_year = df_tab.dropna(subset=['anio']).copy()
 
                     if not df_year.empty:
                         df_year['anio'] = df_year['anio'].astype(int)
@@ -960,7 +960,7 @@ with tabs[2]:
                         df_year['decada'] = pd.cut(df_year['anio'], bins=bins, labels=labels, right=True)
 
                         # Contar cantidad por década
-                        df_count = df_year['decada'].value_counts().reset_index()
+                        df_count = df_year['decada'].value_counts().reset_index().copy()
                         df_count.columns = ['decada', 'cantidad']
                         df_count = df_count.sort_values('decada')
 
@@ -1176,7 +1176,7 @@ with tabs[3]:
                 fig_defensa.update_traces(textposition='outside')
 
                 #st.plotly_chart(fig_defensa, use_container_width=True)
-                st.plotly_chart(fig_defensa)
+                st.plotly_chart(fig_defensa,width="stretch")
 
     #with col5:
         # Becas en el extranjero por país
@@ -1504,7 +1504,8 @@ with tabs[4]:
             df_filtrado_tabla.sort_values('nombre')[[
                 'nombre', 'fec_ini_doc', 'fec_defensa','duracion', 'doctorado', 'uni_doctorado'
             ]],
-            use_container_width=True
+            #use_container_width=True
+            width="stretch"
         )
 
     st.caption(f"Registros mostrados: {len(df_filtrado_tabla)}")
@@ -1673,12 +1674,12 @@ with tabs[5]:
                     height=500
                 )
 
-                col1.plotly_chart(fig, use_container_width=True)
+                col1.plotly_chart(fig, width="stretch")
 
                 # Tabla con nombres
                 df_tabla = df_tab[['nombre', campo]].dropna(subset=[campo])
                 df_tabla = df_tabla.sort_values('nombre')
-                col2.dataframe(df_tabla, height=500, use_container_width=True)
+                col2.dataframe(df_tabla, height=500, width="stretch")
 
         campos_barras = ['financia_becaposdoc', 'lugar_becaposdoc',
                      'contacto_red']
@@ -1753,7 +1754,7 @@ with tabs[5]:
 
                     # Mostrar gráfico en columna con key único
                     #cols[j].plotly_chart(fig, use_container_width=True, height=500, key=f"{campo}_{i}_{j}")
-                    cols[j].plotly_chart(fig,height=500, key=f"{campo}_{i}_{j}")
+                    cols[j].plotly_chart(fig,width="stretch",height=500, key=f"{campo}_{i}_{j}")
 
         # --- contacto_red como dona al final, ancho completo ---
             if 'contacto_red' in df_tab.columns and not df_tab['contacto_red'].dropna().empty:
@@ -1791,7 +1792,7 @@ with tabs[5]:
            # cols[j].plotly_chart(fig, use_container_width=True, height=500, key=f"{campo}_{i}_{j}")
 
             #st.plotly_chart(fig, use_container_width=True, height=700, key="contacto_red")
-            st.plotly_chart(fig, height=700, key="contacto_red")
+            st.plotly_chart(fig,width="stretch", height=700, key="contacto_red")
             #cols[j].plotly_chart(fig, use_container_width=True, height=700, key="contacto_red")
 
     # ---------------------------
@@ -1866,7 +1867,7 @@ with tabs[5]:
                 
                 st.subheader("Tabla de Temas")
                 #st.dataframe(df_dir, use_container_width=True)    
-                st.dataframe(df_dir)    
+                st.dataframe(df_dir,width="stretch")    
 
 
 
@@ -1978,7 +1979,7 @@ with tabs[5]:
 
         # Mostrar en Streamlit
         #st.plotly_chart(fig, use_container_width=True)
-        st.plotly_chart(fig)
+        st.plotly_chart(fig,width="stretch")
 
 
 
@@ -2071,7 +2072,7 @@ with tabs[6]:
 
     df = pd.read_excel("guillermocenso.xlsx")
 
-    print(df.head())
+    #print(df.head())
 # -------------------------------
 # Limpieza de fechas
 # -------------------------------
@@ -2111,15 +2112,25 @@ with tabs[6]:
 # -------------------------------
 
     import numpy as np
-    df["fec_ini_doc1"] = pd.to_datetime(
-        df["fec_ini_doc1"], errors="coerce"
-    )
+    
+    # Asegurar datetime
+    df["fec_ini_doc1"] = pd.to_datetime(df["fec_ini_doc1"], errors="coerce")
+    df["fec_defensa"] = pd.to_datetime(df["fec_defensa"], errors="coerce")
 
-    df_valid = df.dropna(subset=["fec_ini_doc1", "fec_defensa"])
+    # Crear copia real
+    df_valid = df.dropna(subset=["fec_ini_doc1", "fec_defensa"]).copy()
+
+    # Calcular tiempo
     df_valid["TIEMPO_DEFENSA"] = (
         (df_valid["fec_defensa"] - df_valid["fec_ini_doc1"]).dt.days / 365
     )
+
+    # Mediana
     mediana_defensa = df_valid["TIEMPO_DEFENSA"].median()
+
+
+
+
 
 #st.write("Cantidad válida:", len(df_valid))
 #st.write("Mediana:", mediana_defensa)
@@ -2146,7 +2157,10 @@ with tabs[6]:
 #df["Año"] = df["fec_ini_doc"].dt.year
 #df_inicio = df.groupby("Año").size().reset_index(name="Cantidad")
 
-    df_inicio_filtrado = df[df["fec_ini_doc"] >= 2016]
+    #df_inicio_filtrado = df[df["fec_ini_doc"] >= 2016]
+    #df_inicio_filtrado = df[df["fec_ini_doc"]]
+
+    df_inicio_filtrado = df.dropna(subset=["fec_ini_doc"]).copy()
     df_inicio = df_inicio_filtrado.groupby("fec_ini_doc").size().reset_index(name="Cantidad")
 
 #fig1 = px.bar(df_inicio, x="fec_ini_doc", y="Cantidad",
@@ -2207,7 +2221,7 @@ with tabs[6]:
                            margin=dict(t=60, b=100)  # t=espacio arriba para los números, b=espacio abajo para el eje x
                 )
 
-        st.plotly_chart(fig1, use_container_width=True)
+        st.plotly_chart(fig1, width="stretch")
 
 # -------------------------------
 # 📋 Tabla con buscador
@@ -2225,7 +2239,7 @@ with tabs[6]:
                 tabla_hist["Nombre"].str.contains(buscar_hist, case=False, na=False)
             ]
 
-        st.dataframe(tabla_hist, use_container_width=True, hide_index=True)
+        st.dataframe(tabla_hist, width="stretch", hide_index=True)
 
     ##################
 ##grafico 2
@@ -2244,7 +2258,7 @@ with tabs[6]:
 #df_scatter = df_scatter[df_scatter["fec_ini_doc"] >= 2016]
 
 
-    df_scatter = df_scatter[df_scatter["fec_ini_doc"].notna()]
+    df_scatter = df_scatter[df_scatter["fec_ini_doc"].notna()].copy()
 
 
 # Estado de defensa
@@ -2261,10 +2275,10 @@ with tabs[6]:
     )
 
 # Filtrar valores válidos
-    df_scatter = df_scatter[df_scatter["TIEMPO_ANIOS"] > 0]
+    df_scatter = df_scatter[df_scatter["TIEMPO_ANIOS"] > 0].copy()
 
 # Ordenar
-    df_scatter = df_scatter.sort_values("fec_ini_doc")
+    df_scatter = df_scatter.sort_values("fec_ini_doc").copy()
 
 # -------------------------------
 # Crear eje X categórico ordenado
@@ -2322,7 +2336,7 @@ with tabs[6]:
     col_fig, col_tabla = st.columns([2, 1])
 
     with col_fig:
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with col_tabla:
         buscar = st.text_input("Buscar nombre", key="buscar_scatter")
@@ -2338,7 +2352,7 @@ with tabs[6]:
                 tabla["Nombre"].str.contains(buscar, case=False, na=False)
             ]
 
-        st.dataframe(tabla, use_container_width=True, hide_index=True)
+        st.dataframe(tabla, width="stretch", hide_index=True)
 
 
 # ✅ Crear columnas necesarias
@@ -2395,13 +2409,13 @@ with tabs[6]:
         fig6.update_xaxes(type="category")
         fig6.update_layout(height=ALTO_GRAFICOS,margin=dict(t=60, b=90)  # t=espacio arriba para los números, b=espacio abajo para el eje x
     )
-        st.plotly_chart(fig6, use_container_width=True)
+        st.plotly_chart(fig6, width="stretch")
 
     with col_tabla6:
         tabla6 = tasa_cohortes[["ANIO_INICIO", "total", "finalizados", "tasa"]].copy()
         tabla6["tasa"] = tabla6["tasa"].round(1).astype(str) + "%"
         tabla6.columns = ["Cohorte", "Total", "Defendieron", "Tasa"]
-        st.dataframe(tabla6, use_container_width=True, hide_index=True)
+        st.dataframe(tabla6, width="stretch", hide_index=True)
 
 
 # -------------------------------
@@ -2432,7 +2446,7 @@ with tabs[6]:
         fig3.update_yaxes(title_text="Cantidad")
         fig3.update_layout(height=ALTO_GRAFICOS,margin=dict(t=60, b=90)  # t=espacio arriba para los números, b=espacio abajo para el eje x
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width="stretch")
 
     with col_tabla3:
         buscar3 = st.text_input("Buscar nombre", key="buscar_posdoc")
@@ -2441,7 +2455,7 @@ with tabs[6]:
         tabla3 = tabla3.sort_values("Año inicio")
         if buscar3:
             tabla3 = tabla3[tabla3["Nombre"].str.contains(buscar3, case=False, na=False)]
-        st.dataframe(tabla3, use_container_width=True, hide_index=True)
+        st.dataframe(tabla3, width="stretch", hide_index=True)
 
 ###grafico ok
 
@@ -2501,7 +2515,7 @@ with tabs[6]:
             }
             </style>
         """, unsafe_allow_html=True)
-        st.plotly_chart(fig5, use_container_width=True)
+        st.plotly_chart(fig5, width="stretch")
 
     with col_tabla5:
         buscar5 = st.text_input("Buscar nombre", key="buscar_gantt")
@@ -2510,7 +2524,7 @@ with tabs[6]:
         tabla5 = tabla5.sort_values("Año inicio")
         if buscar5:
             tabla5 = tabla5[tabla5["Nombre"].str.contains(buscar5, case=False, na=False)]
-        st.dataframe(tabla5, use_container_width=True, hide_index=True)
+        st.dataframe(tabla5, width="stretch", hide_index=True)
 
 
 #Eje X → año en que inició la beca
@@ -2778,7 +2792,7 @@ with tabs[8]:
                     )
                     #st.plotly_chart(fig, use_container_width=True, height=400)
 
-                    st.plotly_chart(fig,height=400)
+                    st.plotly_chart(fig,width="stretch",height=400)
                 
     #cols = st.columns(2)  # dos columnas para gráficos
     cols = st.columns(2, gap="small")  # dos columnas iguales
