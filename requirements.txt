@@ -1,10 +1,8 @@
 streamlit
 pandas
-numpy
 plotly
-pydeck
-matplotlib
-wordcloud
-statsmodels
-lifelines
 openpyxl
+pydeck
+wordcloud
+matplotlib
+numpy
