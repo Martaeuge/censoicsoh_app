@@ -167,9 +167,10 @@ tabs = st.tabs([
     "Becas Doc.y Financiamiento",
     "Analisis Temporal de becas",
     "Becas PosDoc. y externas",
+    "Becas Doc.-PosDoc inicio-fin",
     "Docencia y Capacitación",
-    "Producción Académica",
-    "Tabla General",
+    "Prod. Académica",
+    "Prod. Sigeva",
     "Otros"
     
 ])
@@ -2053,13 +2054,493 @@ with tabs[5]:
 
                 cols[i % 2].plotly_chart(fig)
 
+#--becas inicio-fin
+with tabs[6]:
+###########27/04/2026
+#########
+###########
 
+    st.set_page_config(layout="wide")
+
+    ALTO_GRAFICOS = 450
+# -------------------------------
+# Cargar datos
+# -------------------------------
+#df = pd.read_csv("guilermocenso.csv")
+
+
+    df = pd.read_excel("guillermocenso.xlsx")
+
+    print(df.head())
+# -------------------------------
+# Limpieza de fechas
+# -------------------------------
+#df["fec_ini_doc"] = pd.to_datetime(df["fec_ini_doc"], errors="coerce")
+
+#df["fec_ini_doc1"] = pd.to_datetime(df["fec_ini_doc"].astype(str) + "-007-01", errors="coerce")
+
+    df["fec_defensa"] = pd.to_datetime(df["fec_defensa"], errors="coerce")
+
+
+# -------------------------------
+# KPI 1: becas doctorales 
+# -------------------------------
+    becasdoc = df[df["becadoctoral"] == "Si"].shape[0]
+
+
+# -------------------------------
+# KPI 1: completas vs incompletas
+# -------------------------------
+
+    completas = df[df["estado_becadoc"] == "Completa"].shape[0]
+    incompletas = df[df["estado_becadoc"] == "Incompleta"].shape[0]
+
+#st.write("Total filas:", len(df))
+#st.write("Duplicados:", df.duplicated().sum())
+# -------------------------------
+# KPI 2: becas posdoc
+# -------------------------------
+    total_posdoc = df[df["beca_posdoc"] == "Si"].shape[0]
+
+#Si
+#No
+
+
+# -------------------------------
+# KPI 3: tiempo hasta defensa
+# -------------------------------
+
+    import numpy as np
+    df["fec_ini_doc1"] = pd.to_datetime(
+        df["fec_ini_doc1"], errors="coerce"
+    )
+
+    df_valid = df.dropna(subset=["fec_ini_doc1", "fec_defensa"])
+    df_valid["TIEMPO_DEFENSA"] = (
+        (df_valid["fec_defensa"] - df_valid["fec_ini_doc1"]).dt.days / 365
+    )
+    mediana_defensa = df_valid["TIEMPO_DEFENSA"].median()
+
+#st.write("Cantidad válida:", len(df_valid))
+#st.write("Mediana:", mediana_defensa)
+
+
+# -------------------------------
+# Layout KPIs
+# -------------------------------
+    col1, col2, col3, col4 ,col5= st.columns(5)
+    col1.metric("Becas doctorales", becasdoc)
+    col2.metric("Becas completas", completas)
+    col3.metric("Becas incompletas", incompletas)
+    col4.metric("Becas posdoc", total_posdoc)
+    col5.metric("Mediana defensa (años)", round(mediana_defensa, 2))
+
+# -------------------------------
+# 📈 Grafico 1: inicio de becas
+# -------------------------------
+#df_inicio = df.groupby(df["fec_ini_doc"].dt.year).size().reset_index(name="Cantidad")
+
+
+
+#df["fec_ini_doc"] = pd.to_datetime(df["fec_ini_doc"], errors="coerce")
+#df["Año"] = df["fec_ini_doc"].dt.year
+#df_inicio = df.groupby("Año").size().reset_index(name="Cantidad")
+
+    df_inicio_filtrado = df[df["fec_ini_doc"] >= 2016]
+    df_inicio = df_inicio_filtrado.groupby("fec_ini_doc").size().reset_index(name="Cantidad")
+
+#fig1 = px.bar(df_inicio, x="fec_ini_doc", y="Cantidad",
+#              title="Cantidad de becas por año de inicio")
+
+#st.plotly_chart(fig1, use_container_width=True)
+# -------------------------------
+# Asegurar tipo correcto
+# -------------------------------
+    df["fec_ini_doc"] = pd.to_numeric(df["fec_ini_doc"], errors="coerce").astype("Int64")
+
+# -------------------------------
+# Filtrar desde 2016
+# -------------------------------
+#df_inicio_filtrado = df[df["fec_ini_doc"] >= 2016].copy()
+#df_inicio_filtrado = df[df["fec_ini_doc"] ].copy()
+    df_inicio_filtrado = df[df["fec_ini_doc"].notna()].copy()
+
+# -------------------------------
+# Agrupar por año
+# -------------------------------
+    df_inicio = (
+        df_inicio_filtrado
+        .groupby("fec_ini_doc")
+        .size()
+        .reset_index(name="Cantidad")
+        .sort_values("fec_ini_doc")
+    )
+
+# -------------------------------
+# Layout: gráfico + tabla
+# -------------------------------
+    col_fig1, col_tabla1 = st.columns([2, 1])
+
+# -------------------------------
+# 📊 Gráfico
+# -------------------------------
+    with col_fig1:
+        fig1 = px.bar(
+            df_inicio,
+            x="fec_ini_doc",
+            y="Cantidad",
+            #title="Cantidad de becas doctorales por año de inicio (2016-2026)",
+            title="Cantidad de becas doctorales por año de inicio ",
+            text="Cantidad"
+        )
+
+        fig1.update_traces(textposition="outside")
+
+        fig1.update_xaxes(
+            title_text="Año de inicio",
+            dtick=1,
+            tickangle=-45   # 👈 acá está la clave
+        )
+
+        fig1.update_yaxes(title_text="Cantidad")
+        fig1.update_layout(height=ALTO_GRAFICOS,
+                           margin=dict(t=60, b=100)  # t=espacio arriba para los números, b=espacio abajo para el eje x
+                )
+
+        st.plotly_chart(fig1, use_container_width=True)
+
+# -------------------------------
+# 📋 Tabla con buscador
+# -------------------------------
+    with col_tabla1:
+        buscar_hist = st.text_input("Buscar nombre", key="buscar_hist")
+
+        tabla_hist = df_inicio_filtrado[["nombre", "fec_ini_doc", "fec_defensa"]].copy()
+        tabla_hist.columns = ["Nombre", "Año inicio", "Fecha defensa"]
+
+        tabla_hist = tabla_hist.sort_values("Año inicio")
+
+        if buscar_hist:
+            tabla_hist = tabla_hist[
+                tabla_hist["Nombre"].str.contains(buscar_hist, case=False, na=False)
+            ]
+
+        st.dataframe(tabla_hist, use_container_width=True, hide_index=True)
+
+    ##################
+##grafico 2
+
+# -------------------------------
+# Preparación datos
+# -------------------------------
+    df_scatter = df.dropna(subset=["fec_ini_doc1"]).copy()
+
+
+
+# Asegurar tipo correcto (año numérico)
+    df_scatter["fec_ini_doc"] = pd.to_numeric(df_scatter["fec_ini_doc"], errors="coerce").astype("Int64")
+
+# Filtrar desde 2016
+#df_scatter = df_scatter[df_scatter["fec_ini_doc"] >= 2016]
+
+
+    df_scatter = df_scatter[df_scatter["fec_ini_doc"].notna()]
+
+
+# Estado de defensa
+    df_scatter["estado_defensa"] = df_scatter["fec_defensa"].apply(
+        lambda x: "Defendió" if pd.notna(x) else "No defendió"
+    )
+
+# Tiempo en años
+    df_scatter["TIEMPO_ANIOS"] = df_scatter.apply(
+        lambda row: (row["fec_defensa"] - row["fec_ini_doc1"]).days / 365
+        if pd.notna(row["fec_defensa"])
+        else (pd.Timestamp.today() - row["fec_ini_doc1"]).days / 365,
+        axis=1
+    )
+
+# Filtrar valores válidos
+    df_scatter = df_scatter[df_scatter["TIEMPO_ANIOS"] > 0]
+
+# Ordenar
+    df_scatter = df_scatter.sort_values("fec_ini_doc")
+
+# -------------------------------
+# Crear eje X categórico ordenado
+# -------------------------------
+    df_scatter["fec_ini_doc"] = df_scatter["fec_ini_doc"].astype(str)
+
+#todos_los_anios = [str(a) for a in range(2016, int(df_scatter["fec_ini_doc"].astype(int).max()) + 1)]
+
+    anio_min = df_scatter["fec_ini_doc"].astype(int).min()
+    anio_max = df_scatter["fec_ini_doc"].astype(int).max()
+
+    todos_los_anios = [str(a) for a in range(anio_min, anio_max + 1)]
+
+    df["fec_ini_doc"] = pd.to_numeric(df["fec_ini_doc"], errors="coerce").astype("Int64")
+
+#df_inicio_filtrado = df.dropna(subset=["fec_ini_doc"]).copy()
+
+    df_inicio_filtrado = df[df["fec_ini_doc"].notna()].copy()
+
+# -------------------------------
+# Crear gráfico (ANTES de usarlo)
+# -------------------------------
+    fig = px.scatter(
+        df_scatter,
+        x="fec_ini_doc",
+        y="TIEMPO_ANIOS",
+        color="estado_defensa",
+        color_discrete_map={
+            "Defendió": "#1D9E75",
+            "No defendió": "#D85A30"
+        },
+        symbol="estado_defensa",
+        symbol_map={
+            "Defendió": "circle",
+            "No defendió": "x"
+        },
+        hover_data=["nombre"],
+        #title="Becarios: tiempo transcurrido desde inicio de beca (2016 en adelante)",
+        title="Tiempo transcurrido desde inicio de beca ",
+        labels={
+            "fec_ini_doc": "Año de inicio",
+            "TIEMPO_ANIOS": "Años transcurridos",
+            "estado_defensa": "Estado"
+        },
+        category_orders={"fec_ini_doc": todos_los_anios}
+    )
+    fig.update_layout(height=ALTO_GRAFICOS,
+                      margin=dict(t=60, b=90)  # t=espacio arriba para los números, b=espacio abajo para el eje x
+    )
+    fig.update_yaxes(title_text="Años desde inicio de beca")
+
+# -------------------------------
+# Layout: gráfico + tabla
+# -------------------------------
+    col_fig, col_tabla = st.columns([2, 1])
+
+    with col_fig:
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col_tabla:
+        buscar = st.text_input("Buscar nombre", key="buscar_scatter")
+
+        tabla = df_scatter[["nombre", "fec_ini_doc", "estado_defensa", "TIEMPO_ANIOS"]].copy()
+        tabla["TIEMPO_ANIOS"] = tabla["TIEMPO_ANIOS"].round(1)
+
+        tabla.columns = ["Nombre", "Año inicio", "Estado", "Años transcurridos"]
+        tabla = tabla.sort_values("Año inicio")
+
+        if buscar:
+            tabla = tabla[
+                tabla["Nombre"].str.contains(buscar, case=False, na=False)
+            ]
+
+        st.dataframe(tabla, use_container_width=True, hide_index=True)
+
+
+# ✅ Crear columnas necesarias
+    df["EVENTO"] = df["fec_defensa"].notna().astype(int)
+    df["ANIO_INICIO"] = df["fec_ini_doc"].apply(lambda x: int(float(x)) if pd.notna(x) else None)
+
+# Filtrar desde 2016
+#df_cohortes = df[df["ANIO_INICIO"] >= 2016].copy()
+
+    df_cohortes = df[df["ANIO_INICIO"].notna()].copy()  # solo saca los que no tienen año
+
+
+    total = df_cohortes.shape[0]
+    finalizados = df_cohortes[df_cohortes["EVENTO"] == 1].shape[0]
+    tasa_finalizacion = finalizados / total * 100
+
+#st.metric("Tasa de finalización (%) Becas doctorales", round(tasa_finalizacion, 2))
+
+# Tasa por cohorte — solo cohortes con al menos 4 años de antigüedad
+    anio_actual = pd.Timestamp.today().year
+    df_cohortes_maduras = df_cohortes[df_cohortes["ANIO_INICIO"] <= anio_actual - 4].copy()
+
+    tasa_cohortes = (
+        df_cohortes_maduras.groupby("ANIO_INICIO")
+        .agg(
+            total=("EVENTO", "count"),
+            finalizados=("EVENTO", "sum")
+        )
+        .reset_index()
+    )
+    tasa_cohortes["tasa"] = tasa_cohortes["finalizados"] / tasa_cohortes["total"] * 100
+#tasa_cohortes["ANIO_INICIO"] = tasa_cohortes["ANIO_INICIO"].astype(str)
+
+    tasa_cohortes["ANIO_INICIO"] = tasa_cohortes["ANIO_INICIO"].astype(int).astype(str)
+
+
+    col_fig6, col_tabla6 = st.columns([2, 1])
+
+    with col_fig6:
+        fig6 = px.line(
+            tasa_cohortes,
+            x="ANIO_INICIO",
+            y="tasa",
+            markers=True,
+            title="Tasa de finalización por cohorte (solo cohortes con 4+ años)",
+            labels={
+                "ANIO_INICIO": "Año de inicio",
+                "tasa": "% que defendió"
+            },
+            text="finalizados"  # muestra cuántos finalizaron en cada punto
+        )
+        fig6.update_traces(texttemplate="%{text} def.", textposition="top center")
+        fig6.update_yaxes(range=[0, 100], ticksuffix="%")
+        fig6.update_xaxes(type="category")
+        fig6.update_layout(height=ALTO_GRAFICOS,margin=dict(t=60, b=90)  # t=espacio arriba para los números, b=espacio abajo para el eje x
+    )
+        st.plotly_chart(fig6, use_container_width=True)
+
+    with col_tabla6:
+        tabla6 = tasa_cohortes[["ANIO_INICIO", "total", "finalizados", "tasa"]].copy()
+        tabla6["tasa"] = tabla6["tasa"].round(1).astype(str) + "%"
+        tabla6.columns = ["Cohorte", "Total", "Defendieron", "Tasa"]
+        st.dataframe(tabla6, use_container_width=True, hide_index=True)
+
+
+# -------------------------------
+# 📈 Gráfico 3: posdoc por periodo
+# -------------------------------
+
+    df_posdoc = df[df["beca_posdoc"] == "Si"].copy()
+    df_posdoc[["anio_ini", "anio_fin"]] = df_posdoc["periodo_becaposdoc"].str.extract(r"(\d{4})-(\d{4})").astype(float)
+    df_posdoc = df_posdoc.dropna(subset=["anio_ini", "anio_fin"])
+    df_posdoc["anio_ini"] = df_posdoc["anio_ini"].astype(int)
+    df_posdoc["anio_fin"] = df_posdoc["anio_fin"].astype(int)
+
+# --- Gráfico 3: histograma por año de inicio ---
+    conteo_ini = df_posdoc.groupby("anio_ini").size().reset_index(name="Cantidad")
+
+    col_fig3, col_tabla3 = st.columns([2, 1])
+
+    with col_fig3:
+        fig3 = px.bar(
+            conteo_ini,
+            x="anio_ini",
+            y="Cantidad",
+            text="Cantidad",
+            title="Becas posdoctorales por año de inicio"
+        )
+        fig3.update_traces(textposition="outside")
+        fig3.update_xaxes(title_text="Año de inicio", type="category", dtick=1)
+        fig3.update_yaxes(title_text="Cantidad")
+        fig3.update_layout(height=ALTO_GRAFICOS,margin=dict(t=60, b=90)  # t=espacio arriba para los números, b=espacio abajo para el eje x
+        )
+        st.plotly_chart(fig3, use_container_width=True)
+
+    with col_tabla3:
+        buscar3 = st.text_input("Buscar nombre", key="buscar_posdoc")
+        tabla3 = df_posdoc[["nombre", "anio_ini", "anio_fin"]].copy()
+        tabla3.columns = ["Nombre", "Año inicio", "Año fin"]
+        tabla3 = tabla3.sort_values("Año inicio")
+        if buscar3:
+            tabla3 = tabla3[tabla3["Nombre"].str.contains(buscar3, case=False, na=False)]
+        st.dataframe(tabla3, use_container_width=True, hide_index=True)
+
+###grafico ok
+
+# Convertir años a fechas para px.timeline
+    df_posdoc["anio_ini_fecha"] = pd.to_datetime(df_posdoc["anio_ini"].astype(int).astype(str) + "-01-01")
+    df_posdoc["anio_fin_fecha"] = pd.to_datetime(df_posdoc["anio_fin"].astype(int).astype(str) + "-12-31")
+
+    col_fig5, col_tabla5 = st.columns([2, 1])
+
+    with col_fig5:
+        fig5 = px.timeline(          # ← esta línea faltaba
+            df_posdoc,
+            x_start="anio_ini_fecha",
+            x_end="anio_fin_fecha",
+            y="nombre",
+            title="Duración de becas posdoctorales por becario",
+            color_discrete_sequence=["#1D9E75"]
+        )
+    ##########
+
+        fig5 = px.timeline(
+            df_posdoc,
+            x_start="anio_ini_fecha",
+            x_end="anio_fin_fecha",
+            y="nombre",
+            title="Duración de becas posdoctorales ",
+            color_discrete_sequence=["#1D9E75"]
+        )
+
+    # Agregar etiqueta con año inicio y fin en cada barra
+        fig5.update_traces(
+            text=df_posdoc.apply(lambda r: f"{int(r['anio_ini'])}–{int(r['anio_fin'])}", axis=1),
+            textposition="inside",
+            insidetextanchor="middle",
+            textfont=dict(color="white", size=11)
+        )
+
+
+
+   #############         
+        fig5.update_yaxes(autorange="reversed", tickmode="linear")
+        fig5.update_xaxes(dtick="M12", tickformat="%Y")
+        fig5.update_layout(
+            height=50 * len(df_posdoc) + 100,
+            #height=ALTO_GRAFICOS,
+            yaxis=dict(showgrid=True, gridcolor="rgba(128,128,128,0.2)"),
+            #margin=dict(l=10, r=10, t=40, b=10),
+            margin=dict(t=60, b=90),  # t=espacio arriba para los números, b=espacio abajo para el eje x
+
+        )
     
+        st.markdown("""
+            <style>
+            [data-testid="stPlotlyChart"] > div {
+                overflow-y: scroll !important;
+                max-height: 400px !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        st.plotly_chart(fig5, use_container_width=True)
 
+    with col_tabla5:
+        buscar5 = st.text_input("Buscar nombre", key="buscar_gantt")
+        tabla5 = df_posdoc[["nombre", "anio_ini", "anio_fin"]].copy()
+        tabla5.columns = ["Nombre", "Año inicio", "Año fin"]
+        tabla5 = tabla5.sort_values("Año inicio")
+        if buscar5:
+            tabla5 = tabla5[tabla5["Nombre"].str.contains(buscar5, case=False, na=False)]
+        st.dataframe(tabla5, use_container_width=True, hide_index=True)
+
+
+#Eje X → año en que inició la beca
+#Eje Y → cuántos años pasaron (hasta la defensa si defendió, hasta hoy si no)
+#Puntos verdes con círculo → defendieron la tesis
+#Cruces naranjas → todavía no defendieron, y cuanto más arriba estén, más tiempo llevan sin defender
+
+#Así de un vistazo podés ver qué cohortes tienen muchos pendientes y cuánto tiempo llevan esperando.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#########
+#########
+###########
 
 # ---------- Docencia y Capacitación ----------
-with tabs[6]:
-    #st.header("Docencia y Capacitación")
+with tabs[7]:
+    st.header("Becas Doc.-PosDoc. inio-fin")
     
     df_tab = df_filtrado.copy()
     cols_doc = ['Nombre','Nivelinstitucion','Sectorinstitucion','HorasSemanales','FormacionGenero','DetalleFormacion']
@@ -2205,7 +2686,7 @@ with tabs[6]:
 
 ####
 
-with tabs[7]:
+with tabs[8]:
     st.header("Revistas y Postu.Becas Ext.")
     df_tab = df_filtrado.copy()
 
@@ -2429,6 +2910,12 @@ with tabs[7]:
         # ------------------------
         # Tabla general
         # ------------------------
+
+with tabs[8]:  # tabs[5] porque los índices empiezan en 0
+    st.header("Producción SIGEVA al 20-04-2026")
+
+
+
 
 
 # Tabs principales
