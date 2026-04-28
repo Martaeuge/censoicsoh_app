@@ -6,3 +6,4 @@ pydeck
 wordcloud
 matplotlib
 numpy
+statsmodels
