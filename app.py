@@ -2941,7 +2941,7 @@ with tabs[9]:  # tabs[5] porque los índices empiezan en 0
         
         # Ruta relativa al archivo app.py
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        ruta = os.path.join(base_dir, "todo.csv")
+        ruta = os.path.join(base_dir, "Todo.csv")
         df = pd.read_csv(ruta, encoding="UTF-8", sep=",")
     
         
