@@ -170,8 +170,8 @@ tabs = st.tabs([
     "Becas Doc.-PosDoc inicio-fin",
     "Docencia y Capacitación",
     "Prod. Académica",
-    "Prod. Sigeva",
-    "Otros"
+    "Prod. Sigeva"
+    
     
 ])
 
@@ -2913,13 +2913,620 @@ with tabs[8]:
         # Tabla general
         # ------------------------
 
-with tabs[8]:  # tabs[5] porque los índices empiezan en 0
-    st.header("Producción SIGEVA al 20-04-2026")
+with tabs[9]:  # tabs[5] porque los índices empiezan en 0
+    #st.header("Producción SIGEVA al 20-04-2026")
+
+    import pandas as pd
+    import networkx as nx
+    from pyvis.network import Network
+
+    # TODO tu código completo acá
+    print("Ejecutando SIGEVA...")
+
+    import streamlit as st
+    import pandas as pd
+    import plotly.express as px
+
+    #st.set_page_config(page_title="Productividad Académica(2016-2026)", layout="wide")
+
+    #st.title(" 📚 Productividad Sigeva(act.22/04/2026) desde 2016 ")
+    st.markdown("### 📚 Productividad Sigeva (act.22/04/2026) desde 2016 ")
+    # -------------------------------
+    # Cargar datos
+    # -------------------------------
+    @st.cache_data
+    def cargar_datos():
+        #df = pd.read_csv("todo.csv", encoding="latin1", sep=",")
+        df = pd.read_csv("todo.csv", encoding="UTF-8", sep=",")
+        df.columns = df.columns.str.strip()
+        df["anio_paper"] = pd.to_numeric(df["anio_paper"], errors="coerce").astype("Int64")
+
+        ###
+        # Rellenar anio_paper con 2020 solo si investigador no está vacío
+        ##si va 
+        mask = df["anio_paper"].isna() & df["investigador"].notna()
+        df.loc[mask, "anio_paper"] = 2020
+
+        ###
+        # Filtrar desde 2016
+        df = df[df["anio_paper"] >= 2016].copy()
+
+        # ← acá, una sola vez al cargar
+        df = df.sort_values("anio_paper", ascending=False)
+        df = df.drop_duplicates(subset=["link_paper"])
+        
+
+        return df
+
+
+    df = cargar_datos()
+
+    # -------------------------------
+    # Sidebar filtros globales
+    # -------------------------------
+    #st.sidebar.title("Filtros")
+
+    categorias = st.multiselect("Categoría", df["categoria"].dropna().unique(), placeholder="Todas")
+
+    df_f = df.copy()
+
+    if categorias:
+        df_f = df_f[df_f["categoria"].isin(categorias)]
+
+    #######saco??
+
+    #tabla_inv = tabla_inv.drop_duplicates(subset=["link_paper"])  # ← saca links repetidos
+    #df_f  = (
+    #    df_f 
+    #    .sort_values("anio_paper", ascending=False)
+    #    .drop_duplicates(subset=["link_paper"])  # ← después del rename
+    #    .copy()
+    #)
+
+    #tabla_inv = df_inv[cols_disponibles].copy().sort_values("Año", ascending=False)
+    #tabla_inv = tabla_inv.drop_duplicates(subset=["Link"])  # ← solo acá
+
+
+    ########
+
+    # -------------------------------
+    # Tabs
+    # -------------------------------
+    tab1, tab2, tab3 = st.tabs([
+        "📊 General",
+        "📈 Totales por tipo",
+        "🔬 Por investigador"
+    ])
+
+    # -------------------------------------------------------
+    # TAB 1: Gráficos generales con filtros
+    # -------------------------------------------------------
+    with tab1:
+        st.header("Visión general")
+
+        
+        # KPIs
+        #col1, col2, col3, col4 = st.columns(4)
+        #col1.metric("Total publicaciones", df_f.shape[0])
+        #col2.metric("Investigadores", df_f["investigador"].nunique())
+        #col3.metric("Años cubiertos", f"{df_f['anio_paper'].min()} - {df_f['anio_paper'].max()}")
+        #col4.metric("Tipos distintos", df_f["tipo"].nunique())
+
+        ###
+        # 
+        #     
+        # KPIs
+        
+        col1, col2, col3, col4, col5 = st.columns(5)
+        #col1.metric("Total publicaciones", df_f.shape[0])
+        #col2.metric("Investigadores", df_f["investigador"].nunique())
+        col1.metric("Años cubiertos", f"{df_f['anio_paper'].min()} - {df_f['anio_paper'].max()}")
+        col2.metric("Becarios", df_f[df_f["categoria"] == "BECARIO"]["investigador"].nunique())
+        col3.metric("Investigadores", df_f[df_f["categoria"] == "INVESTIGADOR"]["investigador"].nunique())
+        col4.metric("Art.9", df_f[df_f["categoria"] == "ART9"]["investigador"].nunique())
+        col5.metric("CPA", df_f[df_f["categoria"] == "CPA"]["investigador"].nunique())
+        
+        ###
+
+        st.divider()
+
+        # Gráfico 1: por año
+        col_g1, col_g2 = st.columns(2)
+
+        with col_g1:
+            df_anio = (
+                df_f.groupby("anio_paper")
+                .size()
+                .reset_index(name="Cantidad")
+                .sort_values("anio_paper")
+            )
+            fig1 = px.bar(
+                df_anio,
+                x="anio_paper",
+                y="Cantidad",
+                text="Cantidad",
+                title="Publicaciones por año",
+                color="Cantidad",
+                color_continuous_scale=px.colors.sequential.Viridis
+            )
+            fig1.update_traces(textposition="outside")
+            fig1.update_xaxes(type="category", tickangle=-45)
+            fig1.update_layout(height=450, coloraxis_showscale=False, margin=dict(t=30, b=97))
+            st.plotly_chart(fig1, width='stretch')
+
+        # Gráfico 2: por tipo
+        with col_g2:
+            df_tipo = df_f["tipo"].value_counts().reset_index()
+            df_tipo.columns = ["tipo", "Cantidad"]
+            fig2 = px.pie(
+                df_tipo,
+                names="tipo",
+                values="Cantidad",
+                title="Distribución por tipo",
+                hole=0.4,
+                color_discrete_sequence=px.colors.qualitative.Set2
+            )
+            fig2.update_traces(textinfo="label+value+percent")
+            fig2.update_layout(height=450, margin=dict(t=50, b=140))
+            st.plotly_chart(fig2, width='stretch')
+
+        # Gráfico 3: por categoría
+        #####################################
+        #df_cat = df_f["categoria"].value_counts().reset_index()
+        #df_cat.columns = ["categoria", "Cantidad"]
+        #fig3 = px.bar(
+        #    df_cat,
+        #    x="Cantidad",
+        #    y="categoria",
+        #    orientation="h",
+        #    text="Cantidad",
+        #    title="Publicaciones por categoría",
+        #    color="Cantidad",
+        #    color_continuous_scale=px.colors.sequential.Plasma
+        #)
+        #fig3.update_traces(textposition="outside")
+        #fig3.update_layout(
+        #    height=max(400, len(df_cat) * 40),
+        #    coloraxis_showscale=False,
+        #    yaxis=dict(automargin=True),
+        #    margin=dict(t=60, b=40)
+        #)
+        #st.plotly_chart(fig3, width='stretch')
+
+        
+
+    #############
+        # Gráfico 4: por año y tipo (apilado)
+        df_anio_tipo = (
+            df_f.groupby(["anio_paper", "tipo"])
+            .size()
+            .reset_index(name="Cantidad")
+            .sort_values("anio_paper")
+        )
+        fig4 = px.bar(
+            df_anio_tipo,
+            x="anio_paper",
+            y="Cantidad",
+            color="tipo",
+            text="Cantidad",
+            title="Publicaciones por año y tipo",
+            barmode="stack",
+            color_discrete_sequence=px.colors.qualitative.Set2
+        )
+        fig4.update_traces(textposition="inside")
+        fig4.update_xaxes(type="category", tickangle=-45)
+        fig4.update_layout(height=450, margin=dict(t=60, b=100), 
+                        bargap=0.1, bargroupgap=0.05)
+
+        
+        st.plotly_chart(fig4, width='stretch')
+
+        df_cat = df_f.groupby(["categoria", "tipo"]).size().reset_index(name="Cantidad")
+
+        fig3 = px.bar(
+            df_cat,
+            x="Cantidad",
+            y="categoria",
+            color="tipo",
+            orientation="h",
+            text="Cantidad",    
+            title="Publicaciones por categoría y tipo",
+            barmode="group",
+            color_discrete_sequence=px.colors.qualitative.Set2
+        )
+        fig3.update_traces(textposition="outside")
+        fig3.update_layout(
+            height=max(400, len(df_cat) * 40),
+            yaxis=dict(automargin=True),
+            margin=dict(t=70, b=50),
+            bargap=0.1, bargroupgap=0.05
+        )
+        st.plotly_chart(fig3, width='stretch')
+
+
+    ###############ver
+        df_cat = (
+            df_f.groupby(["anio_paper", "categoria", "tipo"])
+            .size()
+            .reset_index(name="Cantidad")
+        )
+
+        df_cat["anio_paper"] = df_cat["anio_paper"].astype(str)
+        df_cat = df_cat.sort_values(["anio_paper", "categoria"])
+        df_cat["anio_categoria"] = df_cat["categoria"]  # solo categoría en eje X
+
+        # Lista ordenada de categorías en el eje X (con duplicados por año)
+        eje_x_orden = df_cat["anio_paper"].astype(str) + "||" + df_cat["anio_categoria"]
+        eje_x_orden = list(dict.fromkeys(eje_x_orden.tolist()))  # sin duplicados, orden preservado
+
+        df_cat["eje_x_key"] = df_cat["anio_paper"].astype(str) + "||" + df_cat["anio_categoria"]
+
+        fig3 = px.bar(
+            df_cat,
+            x="eje_x_key",
+            y="Cantidad",
+            color="tipo",
+            text="Cantidad",
+            title="Publicaciones por año, categoría y tipo",
+            barmode="stack",
+            color_discrete_sequence=px.colors.qualitative.Set2,
+            category_orders={"eje_x_key": eje_x_orden}
+        )
+
+        # Eje X muestra solo la categoría, no la key completa
+        tickvals = eje_x_orden
+        ticktext = [k.split("||")[1] for k in eje_x_orden]
+
+        fig3.update_xaxes(
+            tickvals=tickvals,
+            ticktext=ticktext,
+            tickangle=-45,
+            title_text="Categoría"
+        )
+
+        fig3.update_traces(textposition="inside", textfont_size=10)
+
+    # --- Líneas verticales y anotaciones por año ---
+        anios_unicos = sorted(df_cat["anio_paper"].unique())
+        acum = 0
+        for anio in anios_unicos:
+            cant = df_cat[df_cat["anio_paper"] == anio]["eje_x_key"].nunique()
+            centro = acum + cant / 2 - 0.5
+
+        # Anotación del año arriba
+            fig3.add_annotation(
+                x=acum + cant / 2 - 0.5,
+                y=1.05,
+                xref="x",
+                yref="paper",
+                text=f"<b>{anio}</b>",
+                showarrow=False,
+                font=dict(size=12, color="black"),
+                align="center"
+            )
+
+        # Línea divisoria al final del grupo (excepto el último)
+            if anio != anios_unicos[-1]:
+                fig3.add_vline(
+                    x=acum + cant - 0.5,
+                    line_dash="dash",
+                    line_color="gray",
+                    line_width=1.5,
+                    opacity=0.6
+                )
+
+            acum += cant
+
+        fig3.update_layout(
+            height=450,
+            margin=dict(t=30, b=120),
+            legend=dict(
+                orientation="h",
+                y=-0.3,
+                x=0.5,
+                xanchor="center"
+            )
+        )
+
+        st.plotly_chart(fig3, width='stretch')
+
+    # -------------------------------------------------------
+    # TAB 2: Totales por tipo
+    # -------------------------------------------------------
+
+    with tab2:
+        st.header("Totales acumulados por tipo")
+
+        # Métricas por tipo
+        tipos_unicos = df_f["tipo"].dropna().unique()
+        cols_kpi = st.columns(len(tipos_unicos))
+        for i, tipo in enumerate(tipos_unicos):
+            total = df_f[df_f["tipo"] == tipo].shape[0]
+            cols_kpi[i].metric(tipo.capitalize(), total)
+
+        st.divider()
+
+        col_g1, col_g2 = st.columns(2)
+
+        # Barras horizontales totales
+        with col_g1:
+            df_total_tipo = df_f["tipo"].value_counts().reset_index()
+            df_total_tipo.columns = ["tipo", "Total"]
+            fig_t1 = px.bar(
+                df_total_tipo,
+                x="Total",
+                y="tipo",
+                orientation="h",
+                text="Total",
+                title="Total por tipo",
+                color="Total",
+                color_continuous_scale=px.colors.sequential.Viridis
+            )
+            fig_t1.update_traces(textposition="outside")
+            fig_t1.update_layout(
+                height=400,
+                coloraxis_showscale=False,
+                yaxis=dict(automargin=True)
+            )
+            st.plotly_chart(fig_t1, width='stretch')
+
+        # Evolución por tipo a lo largo del tiempo
+        with col_g2:
+            df_evol = (
+                df_f.groupby(["anio_paper", "tipo"])
+                .size()
+                .reset_index(name="Cantidad")
+                .sort_values("anio_paper")
+            )
+            fig_t2 = px.line(
+                df_evol,
+                x="anio_paper",
+                y="Cantidad",
+                color="tipo",
+                markers=True,
+                title="Evolución por tipo a lo largo del tiempo",
+                color_discrete_sequence=px.colors.qualitative.Set2
+            )
+            fig_t2.update_xaxes(type="category", tickangle=-45)
+            fig_t2.update_layout(height=400, margin=dict(t=70, b=90))
+            st.plotly_chart(fig_t2, width='stretch')
+
+        # Tabla resumen
+        ##############
+        df_pivot = (
+            df_f.groupby(["tipo", "anio_paper"])
+            .size()
+            .reset_index(name="Cantidad")
+            .pivot(index="tipo", columns="anio_paper", values="Cantidad")
+            .fillna(0)
+            .astype(int)
+        )
+
+        # Convertir todos los nombres de columnas a string
+        #df_pivot.columns = [str(c) for c in df_pivot.columns]
+        #df_pivot = df_pivot.reset_index()
+
+        #st.dataframe(df_pivot, width='stretch', hide_index=True)
+
+
+
+        df_pivot.columns = [str(c) for c in df_pivot.columns]
+        #df_pivot["TOTAL"] = df_pivot.sum(axis=1)
+
+        #st.dataframe(
+        #    df_pivot.style.background_gradient(cmap="YlOrRd", axis=None),
+        #     width='stretch'
+        #)
+
+        st.dataframe(
+            df_pivot.style,
+            width='stretch'
+        )
+
+    #############
+        import streamlit.components.v1 as components
+
+        # leer el HTML que generaste
+        with open("grafo_becarios.html", "r", encoding="utf-8") as f:
+            html = f.read()
+
+        #html_centrado = f"""
+        #<div style="display:flex; justify-content:center;">
+        #    <div style="width:80%;">
+        #        {html}
+        #    </div>
+        #</div>
+        #"""
+
+
+        html_centrado = f"""
+        <div style="max-width:1200px; margin:0 auto;">
+            {html}
+        </div>
+        """
+
+        components.html(html_centrado, height=1000, scrolling=True)
+
+
+
+        
+    ###############
+
+
+    # -------------------------------------------------------
+    # TAB 3: Por investigador
+    # -------------------------------------------------------
+    with tab3:
+        
+        # Detalle por investigador seleccionado
+        st.subheader("Detalle individual")
+
+        inv_sel = st.selectbox(
+            "Seleccioná un investigador",
+            sorted(df_f["investigador"].dropna().unique())
+        )
+
+        df_inv = df_f[df_f["investigador"] == inv_sel].copy()
+        # KPIs individuales
+
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Producción", df_inv.shape[0])
+        #c2.metric("Tipos distintos", df_inv["tipo"].nunique())
+        c2.metric("Años ", f"{df_inv['anio_paper'].min()} - {df_inv['anio_paper'].max()}")
+
+        
+        with c3:
+            row = df_inv.dropna(subset=["link"]).iloc[0]
+            st.markdown(f"[🔗 {row['investigador']}]({row['link']})")
+            st.caption(f"📌 Tema: {row['tema']}")
+            st.caption(f"🔬 Especialidad: {row['especialidad']}")
+
+
+
+        col_d1, col_d2 = st.columns(2)
+
+        # Por año
+        with col_d1:
+            df_inv_anio = (
+                df_inv.groupby("anio_paper")
+                .size()
+                .reset_index(name="Cantidad")
+                .sort_values("anio_paper")
+            )
+            fig_inv1 = px.bar(
+                df_inv_anio,
+                x="anio_paper",
+                y="Cantidad",
+                text="Cantidad",
+                title=f"Producción por año — {inv_sel}",
+                color="Cantidad",
+                color_continuous_scale=px.colors.sequential.Teal
+            )
+            fig_inv1.update_traces(textposition="outside")
+            fig_inv1.update_xaxes(type="category", tickangle=-45)
+            fig_inv1.update_layout(
+                height=400,
+                coloraxis_showscale=False,
+                margin=dict(t=60, b=80)
+            )
+            st.plotly_chart(fig_inv1, width='stretch')
+
+        # Por tipo
+        with col_d2:
+            df_inv_tipo = df_inv["tipo"].value_counts().reset_index()
+            df_inv_tipo.columns = ["tipo", "Cantidad"]
+            fig_inv2 = px.pie(
+                df_inv_tipo,
+                names="tipo",
+                values="Cantidad",
+                title=f"Por tipo — {inv_sel}",
+                hole=0.4,
+                color_discrete_sequence=px.colors.qualitative.Set2
+            )
+            fig_inv2.update_traces(textinfo="label+value+percent")
+            fig_inv2.update_layout(height=400)
+            st.plotly_chart(fig_inv2, width='stretch')
+
+        # Tabla detallada con links
+        st.subheader("Publicaciones detalladas")
+
+        buscar = st.text_input("Buscar en título o tema", key="buscar_inv")
+
+        cols_mostrar = ["anio_paper", "tipo", "titulo_y", "link_paper"]
+        cols_disponibles = [c for c in cols_mostrar if c in df_inv.columns]
+
+        tabla_inv = df_inv[cols_disponibles].copy().sort_values("anio_paper", ascending=False)
+
+        # Renombrar columnas
+        tabla_inv = tabla_inv.rename(columns={
+            "anio_paper": "Año",
+            "tipo": "Tipo",
+            "titulo_y": "Título",
+            "link_paper": "Link"
+        })
+
+        st.dataframe(
+            tabla_inv,
+            column_config={
+                "Link": st.column_config.LinkColumn("Link")
+            },
+            
+            width='stretch',
+            hide_index=True
+        )
+
+
+    ###############
+        df_ranking = (
+            df_f.groupby(["investigador", "tipo"])  # ← lista, no tupla
+            .size()
+            .reset_index(name="Total")
+            .sort_values("Total", ascending=False)
+        )
+
+        with col_g1:
+            fig_rank = px.bar(
+                df_ranking,
+                x="Total",
+                y="investigador",
+                color="tipo",
+                orientation="h",
+                text="Total",
+                title="Ranking de producción por investigador",
+                barmode="stack",
+                color_discrete_sequence=px.colors.qualitative.Set2
+            )
+            fig_rank.update_traces(textposition="inside")
+            fig_rank.update_layout(
+                height=max(400, df_ranking["investigador"].nunique() * 30),
+                yaxis=dict(automargin=True, categoryorder="total ascending"),
+                margin=dict(t=60, b=40, l=200)
+            )
+
+            st.markdown("""
+                <style>
+                [data-testid="stPlotlyChart"] > div {
+                    overflow-y: scroll !important;
+                    max-height: 400px !important;
+                }
+                </style>
+            """, unsafe_allow_html=True)
+
+            st.plotly_chart(fig_rank,  width='stretch')
+        
+        with col_g2:
+            st.dataframe(df_ranking, width='stretch', hide_index=True)
+
+        
 
 
 
 
+        # Nube de keywords
+        if "keyword" in df_inv.columns and df_inv["keyword"].dropna().shape[0] > 0:
+            from wordcloud import WordCloud, STOPWORDS
+            import matplotlib.pyplot as plt
 
+            st.subheader("Nube de keywords")
+            texto = " ".join(df_inv["keyword"].dropna().tolist())
+            stopwords = set(STOPWORDS)
+            stopwords.update(["de", "la", "el", "y", "en", "del"])
+
+            wc = WordCloud(
+                background_color="white",
+                max_words=100,
+                stopwords=stopwords,
+                colormap="viridis",
+                width=800,
+                height=400
+            ).generate(texto)
+
+            plt.figure(figsize=(12, 5))
+            plt.imshow(wc, interpolation="bilinear")
+            plt.axis("off")
+            st.pyplot(plt)
+
+    
 # Tabs principales
 
 # Mini-dashboard dentro de tabs[6]
