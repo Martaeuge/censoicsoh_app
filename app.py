@@ -2936,7 +2936,7 @@ with tabs[9]:  # tabs[5] porque los índices empiezan en 0
     # -------------------------------
     import os
     @st.cache_data
-    def cargar_datos():
+    def cargar_datos_sigeva():
         #df = pd.read_csv("todo.csv", encoding="latin1", sep=",")
         
         # Ruta relativa al archivo app.py
@@ -2967,7 +2967,7 @@ with tabs[9]:  # tabs[5] porque los índices empiezan en 0
         return df
 
 
-    df = cargar_datos()
+    df = cargar_datos_sigeva()
 
     # -------------------------------
     # Sidebar filtros globales
