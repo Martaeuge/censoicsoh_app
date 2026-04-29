@@ -1,0 +1,542 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 100vh;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+             #loadingBar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width: 100%;
+                 height: 100vh;
+                 background-color:rgba(200,200,200,0.8);
+                 -webkit-transition: all 0.5s ease;
+                 -moz-transition: all 0.5s ease;
+                 -ms-transition: all 0.5s ease;
+                 -o-transition: all 0.5s ease;
+                 transition: all 0.5s ease;
+                 opacity:1;
+             }
+
+             #bar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width:20px;
+                 height:20px;
+                 margin:auto auto auto auto;
+                 border-radius:11px;
+                 border:2px solid rgba(30,30,30,0.05);
+                 background: rgb(0, 173, 246); /* Old browsers */
+                 box-shadow: 2px 0px 4px rgba(0,0,0,0.4);
+             }
+
+             #border {
+                 position:absolute;
+                 top:10px;
+                 left:10px;
+                 width:500px;
+                 height:23px;
+                 margin:auto auto auto auto;
+                 box-shadow: 0px 0px 4px rgba(0,0,0,0.2);
+                 border-radius:10px;
+             }
+
+             #text {
+                 position:absolute;
+                 top:8px;
+                 left:530px;
+                 width:30px;
+                 height:50px;
+                 margin:auto auto auto auto;
+                 font-size:22px;
+                 color: #000000;
+             }
+
+             div.outerBorder {
+                 position:relative;
+                 top:400px;
+                 width:600px;
+                 height:44px;
+                 margin:auto auto auto auto;
+                 border:8px solid rgba(0,0,0,0.1);
+                 background: rgb(252,252,252); /* Old browsers */
+                 background: -moz-linear-gradient(top,  rgba(252,252,252,1) 0%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+                 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,252,252,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+                 background: -webkit-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+                 background: -o-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Opera 11.10+ */
+                 background: -ms-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* IE10+ */
+                 background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* W3C */
+                 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+                 border-radius:72px;
+                 box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+             }
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+<div style="
+position:fixed; top:12px; left:12px; width:260px;
+background:#ffffffee; border:1px solid #ddd; border-radius:12px;
+padding:14px; z-index:9999; font-family:Arial;
+box-shadow:0 4px 16px rgba(0,0,0,0.15);">
+
+  <!-- BUSCADOR -->
+  <b style="font-size:14px;">🔍 Buscar becario</b><br>
+  <input id="busqueda" placeholder="Nombre…"
+    style="width:92%; margin-top:6px; padding:7px;
+    border-radius:6px; border:1px solid #bbb; font-size:13px;">
+  <button onclick="buscarNodo()"
+    style="width:100%; margin-top:8px; padding:8px; border-radius:6px;
+    border:none; background:#6FA1D2; color:white; font-size:13px;
+    cursor:pointer; font-weight:bold;"
+    onmouseover="this.style.background='#5a8fc0'"
+    onmouseout="this.style.background='#6FA1D2'">
+    Buscar
+  </button>
+
+  <hr style="margin:12px 0; border:none; border-top:1px solid #eee;">
+
+  <!-- FILTROS FORMACIÓN -->
+  <b style="font-size:14px;">📂 Formación doctoral</b>
+
+  <div id="titulo-filtro" style="
+    margin-top:8px; padding:7px 10px; border-radius:8px;
+    background:#f0f4fa; font-size:13px; color:#444;
+    font-style:italic; text-align:center; min-height:28px;">
+    Seleccioná un filtro
+  </div>
+
+  <div style="margin-top:10px; display:flex; flex-direction:column; gap:7px;">
+
+    <button id="btn-completa" onclick="activarFiltro('Completa', this)"
+      style="padding:9px 12px; border-radius:8px; border:2px solid #C4B6DD;
+      background:#C4B6DD; font-size:13px; cursor:pointer; font-weight:bold;
+      color:#3a2f5e; text-align:left; transition:all 0.2s;"
+      onmouseover="this.style.background='#b0a0cc'"
+      onmouseout="if(filtroActivo!=='Completa') this.style.background='#C4B6DD'">
+      ✅ &nbsp;Completa
+    </button>
+
+    <button id="btn-incompleta" onclick="activarFiltro('Incompleta', this)"
+      style="padding:9px 12px; border-radius:8px; border:2px solid #FFD1A9;
+      background:#FFD1A9; font-size:13px; cursor:pointer; font-weight:bold;
+      color:#7a4a00; text-align:left; transition:all 0.2s;"
+      onmouseover="this.style.background='#f0b880'"
+      onmouseout="if(filtroActivo!=='Incompleta') this.style.background='#FFD1A9'">
+      🔶 &nbsp;Incompleta
+    </button>
+
+    <button id="btn-todos" onclick="activarFiltro('todos', this)"
+      style="padding:9px 12px; border-radius:8px; border:2px solid #ccc;
+      background:#f5f5f5; font-size:13px; cursor:pointer; font-weight:bold;
+      color:#555; text-align:left; transition:all 0.2s;"
+      onmouseover="this.style.background='#e0e0e0'"
+      onmouseout="if(filtroActivo!=='todos') this.style.background='#f5f5f5'">
+      🔵 &nbsp;Todos
+    </button>
+
+  </div>
+
+  <hr style="margin:12px 0; border:none; border-top:1px solid #eee;">
+
+  <!-- FILTRO ÁREA -->
+  <b style="font-size:14px;">🎓 Área disciplinar</b>
+  <select id="filtro-area"
+    onchange="filtrarPorArea(this.value)"
+    style="
+      width:100%; margin-top:8px; padding:8px;
+      border-radius:8px; border:1px solid #C4B6DD;
+      background:#faf8ff; font-size:13px;
+      color:#3a2f5e; cursor:pointer; outline:none;">
+    <option value="todas">— Todas las áreas —</option>
+  </select>
+
+</div>
+
+<script>
+let filtroActivo = null;
+let areaActiva = "todas";
+
+const titulos = {
+  "Completa":   "📊 Viendo: Formación Completa",
+  "Incompleta": "📊 Viendo: Formación Incompleta",
+  "todos":      "📊 Viendo: Todos los nodos"
+};
+
+const botones = {
+  "Completa":   { id: "btn-completa",   bg: "#C4B6DD" },
+  "Incompleta": { id: "btn-incompleta", bg: "#FFD1A9" },
+  "todos":      { id: "btn-todos",      bg: "#f5f5f5" }
+};
+
+// --- Poblar combo de áreas al cargar ---
+window.addEventListener("load", function () {
+  setTimeout(function () {
+    const nodos = network.body.data.nodes.get();
+
+    
+    const areas = [...new Set(
+      nodos
+        .map(n => n.area)
+        .filter(a => a && a !== "")
+    )].sort();
+
+
+
+
+    const select = document.getElementById("filtro-area");
+    areas.forEach(a => {
+      const opt = document.createElement("option");
+      opt.value = a;
+      opt.textContent = a;
+      select.appendChild(opt);
+    });
+  }, 800);
+});
+
+// --- Filtro combinado: formacion + area ---
+function aplicarFiltrosCombinados() {
+  const todosNodos = network.body.data.nodes.get();
+  const todasAristas = network.body.data.edges.get();
+  const nodosOcultos = new Set();
+
+  todosNodos.forEach(n => {
+    const pasaFormacion =
+      !filtroActivo || filtroActivo === "todos" ||
+      !n.formacion || n.formacion === "" ||
+      n.formacion === filtroActivo;
+
+    const esAreaNode = n.shape === "box";
+    
+    const pasaArea =
+      areaActiva === "todas" ||
+      !n.area ||
+      n.area === areaActiva;
+
+
+
+
+
+
+
+    if (!pasaFormacion || !pasaArea) {
+      nodosOcultos.add(n.id);
+    }
+  });
+
+  const aristasOcultas = new Set();
+  todasAristas.forEach(e => {
+    if (nodosOcultos.has(e.from) || nodosOcultos.has(e.to)) {
+      aristasOcultas.add(e.id);
+    }
+  });
+
+  // Ocultar nodos secundarios aislados
+  todosNodos.forEach(n => {
+    if (!nodosOcultos.has(n.id)) {
+      const aristasDelNodo = todasAristas.filter(
+        e => e.from === n.id || e.to === n.id
+      );
+      if (aristasDelNodo.length > 0) {
+        const todasOcultas = aristasDelNodo.every(e => aristasOcultas.has(e.id));
+        if (todasOcultas) nodosOcultos.add(n.id);
+      }
+    }
+  });
+
+  network.body.data.nodes.update(
+    todosNodos.map(n => ({ id: n.id, hidden: nodosOcultos.has(n.id) }))
+  );
+  network.body.data.edges.update(
+    todasAristas.map(e => ({ id: e.id, hidden: aristasOcultas.has(e.id) }))
+  );
+}
+
+// --- Activar filtro de formación ---
+function activarFiltro(valor, botonClickeado) {
+  filtroActivo = valor;
+
+  Object.values(botones).forEach(b => {
+    const el = document.getElementById(b.id);
+    el.style.background = b.bg;
+    el.style.boxShadow = "none";
+    el.style.transform = "scale(1)";
+  });
+
+  botonClickeado.style.boxShadow = "0 0 0 3px rgba(0,0,0,0.18)";
+  botonClickeado.style.transform = "scale(1.03)";
+  document.getElementById("titulo-filtro").textContent = titulos[valor];
+
+  aplicarFiltrosCombinados();
+}
+
+// --- Activar filtro de área ---
+function filtrarPorArea(areaSeleccionada) {
+  areaActiva = areaSeleccionada;
+  aplicarFiltrosCombinados();
+}
+
+// --- Buscador ---
+function buscarNodo(){
+  let txt = document.getElementById("busqueda").value.toLowerCase();
+  if(!txt) return;
+  let nodes = network.body.data.nodes.get();
+  for(let n of nodes){
+    if(n.label && n.label.toLowerCase().includes(txt)){
+      network.selectNodes([n.id]);
+      network.focus(n.id,{
+        scale:1.03,
+        animation:{duration:600, easingFunction:"easeInOutQuad"}
+      });
+      break;
+    }
+  }
+}
+</script>
+
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+            <div id="loadingBar">
+              <div class="outerBorder">
+                <div id="text">0%</div>
+                <div id="border">
+                  <div id="bar"></div>
+                </div>
+              </div>
+            </div>
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "AGUERO, GALA HUILEN", "label": "AGUERO, GALA HUILEN\n2017 - 2022", "nombre": "AGUERO, GALA HUILEN", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Antropolog\u00eda", "label": "Antropolog\u00eda", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "DE L\u0027ESTOIL, BENOIT", "label": "DE L\u0027ESTOIL, BENOIT", "shape": "dot", "size": 14}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "CASIMIRO CORDOBA, ANA VICTORIA", "label": "CASIMIRO CORDOBA, ANA VICTORIA\n2014 - 2018", "nombre": "CASIMIRO CORDOBA, ANA VICTORIA", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "COSSO, PABLO ESTEBAN", "label": "COSSO, PABLO ESTEBAN\n2020 - 2026", "nombre": "COSSO, PABLO ESTEBAN", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "DI PIETRO, NOELIA DANIELA", "label": "DI PIETRO, NOELIA DANIELA\n2020 - 2026", "nombre": "DI PIETRO, NOELIA DANIELA", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "DIMARCO, LUCIANA SOFIA", "label": "DIMARCO, LUCIANA SOFIA\n2017 - 2023", "nombre": "DIMARCO, LUCIANA SOFIA", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "ESPINOSA, MARIA CECILIA", "label": "ESPINOSA, MARIA CECILIA", "nombre": "ESPINOSA, MARIA CECILIA", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "FERNANDEZ, LUIS ALFREDO", "label": "FERNANDEZ, LUIS ALFREDO\n2016 - 2022", "nombre": "FERNANDEZ, LUIS ALFREDO", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "FLORES, ANDREA CAROLINA", "label": "FLORES, ANDREA CAROLINA\nPosdoc: 2016 - 2017", "nombre": "FLORES, ANDREA CAROLINA", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "MANSILLA PEREZ, MARIA NOELIA DE LAS MERCEDES", "label": "MANSILLA PEREZ, MARIA NOELIA DE LAS MERCEDES\n2020 - 2026", "nombre": "MANSILLA PEREZ, MARIA NOELIA DE LAS MERCEDES", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "RIOS, SOFIA", "label": "RIOS, SOFIA\n2021 - 2027", "nombre": "RIOS, SOFIA", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "SARAVIA, ARIEL FERNANDO", "label": "SARAVIA, ARIEL FERNANDO", "nombre": "SARAVIA, ARIEL FERNANDO", "shape": "ellipse", "size": 20}, {"area": "Antropolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "SUAREZ, MARIA EUGENIA", "label": "SUAREZ, MARIA EUGENIA\n2024 - 2026", "nombre": "SUAREZ, MARIA EUGENIA", "shape": "ellipse", "size": 20}, {"area": "Letras", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "ARCE DE PIERO, MARIO LEANDRO", "label": "ARCE DE PIERO, MARIO LEANDRO\n2018 - 2024\nPosdoc: 2024 - 2027", "nombre": "ARCE DE PIERO, MARIO LEANDRO", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Letras", "label": "Letras", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "SOSA, MARCELA BEATRIZ", "label": "SOSA, MARCELA BEATRIZ", "shape": "dot", "size": 14}, {"area": "Letras", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "FLEMING, MARIA LUCILA", "label": "FLEMING, MARIA LUCILA\n2020 - 2026", "nombre": "FLEMING, MARIA LUCILA", "shape": "ellipse", "size": 20}, {"area": "Letras", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "MANINO, MARCIA MURIEL", "label": "MANINO, MARCIA MURIEL\n2023 - 2028", "nombre": "MANINO, MARCIA MURIEL", "shape": "ellipse", "size": 20}, {"area": "Letras", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "SORIA QUISPE, JOSEFINA MERCEDES", "label": "SORIA QUISPE, JOSEFINA MERCEDES\n2015 - 2020\nPosdoc: 2025 - 2028", "nombre": "SORIA QUISPE, JOSEFINA MERCEDES", "shape": "ellipse", "size": 20}, {"area": "Letras", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "VARGAS FONSECA, ELUNEY ANAHI", "label": "VARGAS FONSECA, ELUNEY ANAHI\n2024 - 2029", "nombre": "VARGAS FONSECA, ELUNEY ANAHI", "shape": "ellipse", "size": 20}, {"area": "Ciencias Sociales", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "ATAIDE, SORAYA", "label": "ATAIDE, SORAYA\nPosdoc: 2017 - 2021", "nombre": "ATAIDE, SORAYA", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Ciencias Sociales", "label": "Ciencias Sociales", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "PIZARRO, CYNTHIA", "label": "PIZARRO, CYNTHIA", "shape": "dot", "size": 14}, {"area": "Ciencias Sociales", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "FERNANDEZ, GONZALO JUAN JOSE", "label": "FERNANDEZ, GONZALO JUAN JOSE\n2018 - 2024", "nombre": "FERNANDEZ, GONZALO JUAN JOSE", "shape": "ellipse", "size": 20}, {"area": "Ciencias Sociales", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "MORALES, MARIA SILVIA", "label": "MORALES, MARIA SILVIA\n2023 - 2028", "nombre": "MORALES, MARIA SILVIA", "shape": "ellipse", "size": 20}, {"area": "Ciencias Sociales", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "ORTEGA, MARIANA DE LOS ANGELES", "label": "ORTEGA, MARIANA DE LOS ANGELES\n2016 - 2022", "nombre": "ORTEGA, MARIANA DE LOS ANGELES", "shape": "ellipse", "size": 20}, {"area": "Ciencias Sociales", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "ZURITA, INES PATRICIA", "label": "ZURITA, INES PATRICIA\n2020 - 2026", "nombre": "ZURITA, INES PATRICIA", "shape": "ellipse", "size": 20}, {"area": "Ciencias Sociales", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "PEDRAZA, MELANIE LUTMILA", "label": "PEDRAZA, MELANIE LUTMILA\n2024 - 2029", "nombre": "PEDRAZA, MELANIE LUTMILA", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "BARBOZA, PAUL RICHART", "label": "BARBOZA, PAUL RICHART\n2023 - 2028", "nombre": "BARBOZA, PAUL RICHART", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Historia", "label": "Historia", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "RABINOVICH, ALEJANDRO", "label": "RABINOVICH, ALEJANDRO", "shape": "dot", "size": 14}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "BORGOGNONI, EZEQUIEL", "label": "BORGOGNONI, EZEQUIEL", "nombre": "BORGOGNONI, EZEQUIEL", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "CHILIGUAY, ALEJANDRO NICOLAS", "label": "CHILIGUAY, ALEJANDRO NICOLAS\n2018 - 2025\nPosdoc: 2024 - 2027", "nombre": "CHILIGUAY, ALEJANDRO NICOLAS", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "CORREA, MARCELO", "label": "CORREA, MARCELO\n2016 - 2022\nPosdoc: 2023 - 2026", "nombre": "CORREA, MARCELO", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "ELIAS, MARIA EUGENIA ROSA", "label": "ELIAS, MARIA EUGENIA ROSA\n2021 - 2027", "nombre": "ELIAS, MARIA EUGENIA ROSA", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "HAMUD FERNANDEZ, LEANDRO", "label": "HAMUD FERNANDEZ, LEANDRO", "nombre": "HAMUD FERNANDEZ, LEANDRO", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "LUZZI, MARCELO ARMANDO", "label": "LUZZI, MARCELO ARMANDO", "nombre": "LUZZI, MARCELO ARMANDO", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "MONTA\u00d1EZ FERNANDEZ, VIRGINIA ROSANA", "label": "MONTA\u00d1EZ FERNANDEZ, VIRGINIA ROSANA\n2022 - 2025", "nombre": "MONTA\u00d1EZ FERNANDEZ, VIRGINIA ROSANA", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "MORALES MIY, EVA ANAHI", "label": "MORALES MIY, EVA ANAHI\n2018 - 2024", "nombre": "MORALES MIY, EVA ANAHI", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "QUINTEROS, VICTOR ENRIQUE", "label": "QUINTEROS, VICTOR ENRIQUE\n2013 - 2018\nPosdoc: 2023 - 2025", "nombre": "QUINTEROS, VICTOR ENRIQUE", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "RUEDA, SERGIO FACUNDO", "label": "RUEDA, SERGIO FACUNDO\n2022 - 2027", "nombre": "RUEDA, SERGIO FACUNDO", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "TAMBELLA, FRANCO LUCIANO", "label": "TAMBELLA, FRANCO LUCIANO", "nombre": "TAMBELLA, FRANCO LUCIANO", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "VILLANUEVA, JAVIER HIPOLITO", "label": "VILLANUEVA, JAVIER HIPOLITO\n2022 - 2024\nPosdoc: 2025 - 2028", "nombre": "VILLANUEVA, JAVIER HIPOLITO", "shape": "ellipse", "size": 20}, {"area": "Historia", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "CAMPOS, ROCIO SOLEDAD", "label": "CAMPOS, ROCIO SOLEDAD\n2024 - 2029", "nombre": "CAMPOS, ROCIO SOLEDAD", "shape": "ellipse", "size": 20}, {"area": "Ciencias de la Educaci\u00f3n", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "BARROZO, NATALIA NOEMI", "label": "BARROZO, NATALIA NOEMI\n2015 - 2020", "nombre": "BARROZO, NATALIA NOEMI", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Ciencias de la Educaci\u00f3n", "label": "Ciencias de la Educaci\u00f3n", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "PANTANO, LILIANA", "label": "PANTANO, LILIANA", "shape": "dot", "size": 14}, {"area": "Ciencias de la Educaci\u00f3n", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "CARLOS, NADIA IVONNE", "label": "CARLOS, NADIA IVONNE\n2023 - 2025", "nombre": "CARLOS, NADIA IVONNE", "shape": "ellipse", "size": 20}, {"area": "Ciencias de la Educaci\u00f3n", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "FLORES, SILVANA CAROLINA", "label": "FLORES, SILVANA CAROLINA\n2019 - 2025", "nombre": "FLORES, SILVANA CAROLINA", "shape": "ellipse", "size": 20}, {"area": "Ciencias de la Educaci\u00f3n", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "MACIEL, MARIA MAGDALENA", "label": "MACIEL, MARIA MAGDALENA", "nombre": "MACIEL, MARIA MAGDALENA", "shape": "ellipse", "size": 20}, {"area": "Ciencias de la Educaci\u00f3n", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "PEREZ, ROMINA DE LAS MERCEDES", "label": "PEREZ, ROMINA DE LAS MERCEDES", "nombre": "PEREZ, ROMINA DE LAS MERCEDES", "shape": "ellipse", "size": 20}, {"area": "Ciencias de la Educaci\u00f3n", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "SORIANO, GONZALO VICTOR HUMBERTO", "label": "SORIANO, GONZALO VICTOR HUMBERTO\n2020 - 2026", "nombre": "SORIANO, GONZALO VICTOR HUMBERTO", "shape": "ellipse", "size": 20}, {"area": "Ciencias de la Educaci\u00f3n", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "TARIFA FERNANDEZ, VIVIANA MARCELA", "label": "TARIFA FERNANDEZ, VIVIANA MARCELA\n2023 - 2025", "nombre": "TARIFA FERNANDEZ, VIVIANA MARCELA", "shape": "ellipse", "size": 20}, {"area": "Ciencias de la Educaci\u00f3n", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "VERA, MARIEL FERNANDA DEL ROSARIO", "label": "VERA, MARIEL FERNANDA DEL ROSARIO\n2024 - 2029", "nombre": "VERA, MARIEL FERNANDA DEL ROSARIO", "shape": "ellipse", "size": 20}, {"area": "Comunicaci\u00f3n Social", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "BORDON, ESTEBAN ISMAEL", "label": "BORDON, ESTEBAN ISMAEL\n2022 - 2025", "nombre": "BORDON, ESTEBAN ISMAEL", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Comunicaci\u00f3n Social", "label": "Comunicaci\u00f3n Social", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "ALBARELLO, FRANCISCO", "label": "ALBARELLO, FRANCISCO", "shape": "dot", "size": 14}, {"area": "Comunicaci\u00f3n Social", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "DEHARBE, DIANA CAROLINA", "label": "DEHARBE, DIANA CAROLINA", "nombre": "DEHARBE, DIANA CAROLINA", "shape": "ellipse", "size": 20}, {"area": "Comunicaci\u00f3n Social", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "MORALES MIY, IGNACIO NAIME", "label": "MORALES MIY, IGNACIO NAIME", "nombre": "MORALES MIY, IGNACIO NAIME", "shape": "ellipse", "size": 20}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "GALPERIN, KARINA", "label": "GALPERIN, KARINA", "shape": "dot", "size": 14}, {"area": "Arqueolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "CABRAL ORTIZ, JORGE ESTEBAN", "label": "CABRAL ORTIZ, JORGE ESTEBAN\n2015 - 2016", "nombre": "CABRAL ORTIZ, JORGE ESTEBAN", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Arqueolog\u00eda", "label": "Arqueolog\u00eda", "shape": "box", "size": 16, "tipo": "area"}, {"area": "Arqueolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "CARDOZO, RODRIGO SEBASTIAN", "label": "CARDOZO, RODRIGO SEBASTIAN\n2020 - 2026", "nombre": "CARDOZO, RODRIGO SEBASTIAN", "shape": "ellipse", "size": 20}, {"area": "Arqueolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "CORNEJO MALTZ, BERNARDO GABRIEL", "label": "CORNEJO MALTZ, BERNARDO GABRIEL\n2022 - 2027", "nombre": "CORNEJO MALTZ, BERNARDO GABRIEL", "shape": "ellipse", "size": 20}, {"area": "Arqueolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "GARCIA DE CECCO, MARIA PILAR", "label": "GARCIA DE CECCO, MARIA PILAR\n2023 - 2027", "nombre": "GARCIA DE CECCO, MARIA PILAR", "shape": "ellipse", "size": 20}, {"area": "Arqueolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "MACORITTO TORCIVIA, CLAUDIA", "label": "MACORITTO TORCIVIA, CLAUDIA\n2021 - 2025", "nombre": "MACORITTO TORCIVIA, CLAUDIA", "shape": "ellipse", "size": 20}, {"area": "Arqueolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "TORRES LOPEZ, VALENTINA LUCIA", "label": "TORRES LOPEZ, VALENTINA LUCIA\n2023 - 2028", "nombre": "TORRES LOPEZ, VALENTINA LUCIA", "shape": "ellipse", "size": 20}, {"area": "Arqueolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "GANAM CAMPOS, FLORENCIA CECILIA", "label": "GANAM CAMPOS, FLORENCIA CECILIA\n2024 - 2029", "nombre": "GANAM CAMPOS, FLORENCIA CECILIA", "shape": "ellipse", "size": 20}, {"area": "Arqueolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "CARABAJAL, MICAELA CONSTANZA", "label": "CARABAJAL, MICAELA CONSTANZA\n2026 - 2031", "nombre": "CARABAJAL, MICAELA CONSTANZA", "shape": "ellipse", "size": 20}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "LEDESMA, ROSSANA ELIZABETH", "label": "LEDESMA, ROSSANA ELIZABETH", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "BULIUBASICH, EMILIANA CATALINA", "label": "BULIUBASICH, EMILIANA CATALINA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "NIEVA, GUILLERMO RENE", "label": "NIEVA, GUILLERMO RENE", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "NIELSEN, AXEL", "label": "NIELSEN, AXEL", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "CERIANI CERNADAS, C\u00c9SAR", "label": "CERIANI CERNADAS, C\u00c9SAR", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "OSSOLA, MARIA MACARENA", "label": "OSSOLA, MARIA MACARENA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "VILLAGRAN, ANDREA JIMENA", "label": "VILLAGRAN, ANDREA JIMENA", "shape": "dot", "size": 14}, {"area": "Ling\u00fc\u00edstica", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "DURAN, ROMINA GISELA", "label": "DURAN, ROMINA GISELA\n2023 - 2027", "nombre": "DURAN, ROMINA GISELA", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Ling\u00fc\u00edstica", "label": "Ling\u00fc\u00edstica", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "C\u00daNEO, PAOLA", "label": "C\u00daNEO, PAOLA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "PRESTA, SUSANA", "label": "PRESTA, SUSANA", "shape": "dot", "size": 14}, {"area": "S/D", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "FERRO, GABRIELA KAREN", "label": "FERRO, GABRIELA KAREN", "nombre": "FERRO, GABRIELA KAREN", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "S/D", "label": "S/D", "shape": "box", "size": 16, "tipo": "area"}, {"area": "S/D", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "GONZALEZ ROMANO, JOSE FRANCISCO", "label": "GONZALEZ ROMANO, JOSE FRANCISCO", "nombre": "GONZALEZ ROMANO, JOSE FRANCISCO", "shape": "ellipse", "size": 20}, {"area": "S/D", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "JEREZ HENRIQUEZ, BARBARA PAZ", "label": "JEREZ HENRIQUEZ, BARBARA PAZ", "nombre": "JEREZ HENRIQUEZ, BARBARA PAZ", "shape": "ellipse", "size": 20}, {"area": "S/D", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "PEREZ, GABRIEL ANGEL", "label": "PEREZ, GABRIEL ANGEL\n2026 - 2031", "nombre": "PEREZ, GABRIEL ANGEL", "shape": "ellipse", "size": 20}, {"area": "S/D", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "ELIAS, RACHUAN FLORENCIO GUSTAVO", "label": "ELIAS, RACHUAN FLORENCIO GUSTAVO\n2026 - 2031", "nombre": "ELIAS, RACHUAN FLORENCIO GUSTAVO", "shape": "ellipse", "size": 20}, {"area": "S/D", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "ACU\u00d1A MARTINEZ, JOSEFO", "label": "ACU\u00d1A MARTINEZ, JOSEFO\n2026 - 2031", "nombre": "ACU\u00d1A MARTINEZ, JOSEFO", "shape": "ellipse", "size": 20}, {"area": "S/D", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "BELMONT COLOMBRES, MAR\u00cdA EUGENIA", "label": "BELMONT COLOMBRES, MAR\u00cdA EUGENIA\n2026 - 2031", "nombre": "BELMONT COLOMBRES, MAR\u00cdA EUGENIA", "shape": "ellipse", "size": 20}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "A\u00d1\u00d3N, VALERIA", "label": "A\u00d1\u00d3N, VALERIA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "ALVAREZ LEGUIZAMON, SONIA", "label": "ALVAREZ LEGUIZAMON, SONIA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "GUTIERREZ, TALIA VIOLETA", "label": "GUTIERREZ, TALIA VIOLETA", "shape": "dot", "size": 14}, {"area": "Geograf\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "FORMIA, MARTIN EZEQUIEL", "label": "FORMIA, MARTIN EZEQUIEL\n2016 - 2023", "nombre": "FORMIA, MARTIN EZEQUIEL", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Geograf\u00eda", "label": "Geograf\u00eda", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "FLORES KLARIK, MONICA NOEMI", "label": "FLORES KLARIK, MONICA NOEMI", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "RIVOLTA, MARIA CLARA", "label": "RIVOLTA, MARIA CLARA", "shape": "dot", "size": 14}, {"area": "Literatura", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "GONZALEZ MOLINA, MARIO AUGUSTO", "label": "GONZALEZ MOLINA, MARIO AUGUSTO\n2021 - 2027", "nombre": "GONZALEZ MOLINA, MARIO AUGUSTO", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Literatura", "label": "Literatura", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "FINE, RUTH", "label": "FINE, RUTH", "shape": "dot", "size": 14}, {"area": "Literatura", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "GRANEROS, MATIAS GERARDO", "label": "GRANEROS, MATIAS GERARDO\n2022 - 2027", "nombre": "GRANEROS, MATIAS GERARDO", "shape": "ellipse", "size": 20}, {"area": "Psicolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "GONZALEZ, MARIA EUGENIA", "label": "GONZALEZ, MARIA EUGENIA", "nombre": "GONZALEZ, MARIA EUGENIA", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Psicolog\u00eda", "label": "Psicolog\u00eda", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "LOPEZ, IRENE NOEMI", "label": "LOPEZ, IRENE NOEMI", "shape": "dot", "size": 14}, {"area": "Estudios Sociales y de la Cultura", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "TABARCACHE, LUCAS MATIAS", "label": "TABARCACHE, LUCAS MATIAS\n2023 - 2028", "nombre": "TABARCACHE, LUCAS MATIAS", "shape": "ellipse", "size": 20}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "MATA, SARA EMILIA", "label": "MATA, SARA EMILIA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "DE FEO, MAR\u00cdA EUGENIA", "label": "DE FEO, MAR\u00cdA EUGENIA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "SOSA, CARLOS HERNAN", "label": "SOSA, CARLOS HERNAN", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "GODOY, MARIANA INES", "label": "GODOY, MARIANA INES", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "QUI\u00d1ONEZ, MARIA MERCEDES", "label": "QUI\u00d1ONEZ, MARIA MERCEDES", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "RODRIGUEZ, NURIA MACARENA", "label": "RODRIGUEZ, NURIA MACARENA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "RUIDREJO, ANGEL ALEJANDRO", "label": "RUIDREJO, ANGEL ALEJANDRO", "shape": "dot", "size": 14}, {"area": "Filosof\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "PERALTA, JUAN ALEXANDER", "label": "PERALTA, JUAN ALEXANDER\n2023 - 2028", "nombre": "PERALTA, JUAN ALEXANDER", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Filosof\u00eda", "label": "Filosof\u00eda", "shape": "box", "size": 16, "tipo": "area"}, {"area": "Filosof\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "VARGAS, MARIELA SILVANA", "label": "VARGAS, MARIELA SILVANA", "nombre": "VARGAS, MARIELA SILVANA", "shape": "ellipse", "size": 20}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "VILLALTA, CARLA", "label": "VILLALTA, CARLA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "CHAILE, TELMA LILIANA", "label": "CHAILE, TELMA LILIANA", "shape": "dot", "size": 14}, {"area": "Estudios Sociales y de la Cultura", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "SORAIRE, ANALIA FLORENCIA", "label": "SORAIRE, ANALIA FLORENCIA", "nombre": "SORAIRE, ANALIA FLORENCIA", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Estudios Sociales y de la Cultura", "label": "Estudios Sociales y de la Cultura", "shape": "box", "size": 16, "tipo": "area"}, {"area": "Estudios Sociales y de la Cultura", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "ACOSTA, DELFINA", "label": "ACOSTA, DELFINA\n2023 - 2028", "nombre": "ACOSTA, DELFINA", "shape": "ellipse", "size": 20}, {"area": "Estudios Sociales y de la Cultura", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "PERALTA, DELIA", "label": "PERALTA, DELIA\n2025 - 2030", "nombre": "PERALTA, DELIA", "shape": "ellipse", "size": 20}, {"area": "Estudios Sociales y de la Cultura", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "SALVA, ANAHI MAGDALENA", "label": "SALVA, ANAHI MAGDALENA\n2026 - 2031", "nombre": "SALVA, ANAHI MAGDALENA", "shape": "ellipse", "size": 20}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "GUZM\u00c1N, RAQUEL", "label": "GUZM\u00c1N, RAQUEL", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "TRPIN, VERONICA", "label": "TRPIN, VERONICA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "BOCCHIO, CECILIA", "label": "BOCCHIO, CECILIA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "MORALEJO, REINALDO", "label": "MORALEJO, REINALDO", "shape": "dot", "size": 14}, {"area": "Sociolog\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "VARA, JESICA MICAELA", "label": "VARA, JESICA MICAELA\n2021 - 2027", "nombre": "VARA, JESICA MICAELA", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Sociolog\u00eda", "label": "Sociolog\u00eda", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "CANEVARO, SANTIAGO", "label": "CANEVARO, SANTIAGO", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "CEBRELLI, ALEJANDRA LIA JULIA", "label": "CEBRELLI, ALEJANDRA LIA JULIA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "CAMPENY, SARA MARIA LUISA", "label": "CAMPENY, SARA MARIA LUISA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "GONZ\u00c1LEZ, FACUNDO", "label": "GONZ\u00c1LEZ, FACUNDO", "shape": "dot", "size": 14}, {"area": "Demograf\u00eda", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "VILTE, GENARO JUAN LEONARDO", "label": "VILTE, GENARO JUAN LEONARDO\n2024 - 2029", "nombre": "VILTE, GENARO JUAN LEONARDO", "shape": "ellipse", "size": 20}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "CAMPUZANO, BETINA", "label": "CAMPUZANO, BETINA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "BOCCARDI, FACUNDO", "label": "BOCCARDI, FACUNDO", "shape": "dot", "size": 14}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Demograf\u00eda", "label": "Demograf\u00eda", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "JUSTO VON LURZER, CAROLINA", "label": "JUSTO VON LURZER, CAROLINA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "CARPIO, MAR\u00cdA BEL\u00c9N", "label": "CARPIO, MAR\u00cdA BEL\u00c9N", "shape": "dot", "size": 14}, {"area": "Humanidades", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Incompleta", "id": "LOPEZ, FABIANA", "label": "LOPEZ, FABIANA\n2025 - 2027", "nombre": "LOPEZ, FABIANA", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "Humanidades", "label": "Humanidades", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "ROMERO, NESTOR HUGO", "label": "ROMERO, NESTOR HUGO", "shape": "dot", "size": 14}, {"area": "M\u00fasica", "color": {"background": "#6FA1D2"}, "font": {"color": "#222", "size": 14}, "formacion": "Completa", "id": "GODOY, SANTIAGO", "label": "GODOY, SANTIAGO\n2015 - 2021\nPosdoc: 2024 - 2027", "nombre": "GODOY, SANTIAGO", "shape": "ellipse", "size": 20}, {"color": {"background": "#C4B6DD"}, "font": {"color": "#222", "size": 13}, "formacion": "", "id": "M\u00fasica", "label": "M\u00fasica", "shape": "box", "size": 16, "tipo": "area"}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "ULM, HERN\u00c1N RODOLFO", "label": "ULM, HERN\u00c1N RODOLFO", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "ALVAREZ CHAMALE, MARIA FERNANDA", "label": "ALVAREZ CHAMALE, MARIA FERNANDA", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "CHRISTEL, LUCAS GABRIEL", "label": "CHRISTEL, LUCAS GABRIEL", "shape": "dot", "size": 14}, {"color": {"background": "#FFD1A9"}, "font": {"color": "#222", "size": 14}, "formacion": "", "id": "GIL, JOSE FERNANDO", "label": "GIL, JOSE FERNANDO", "shape": "dot", "size": 14}]);
+                  edges = new vis.DataSet([{"from": "AGUERO, GALA HUILEN", "title": "pertenece_a", "to": "Antropolog\u00eda", "width": 1}, {"from": "AGUERO, GALA HUILEN", "title": "dirige", "to": "DE L\u0027ESTOIL, BENOIT", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "CASIMIRO CORDOBA, ANA VICTORIA", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "COSSO, PABLO ESTEBAN", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "DI PIETRO, NOELIA DANIELA", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "DIMARCO, LUCIANA SOFIA", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "ESPINOSA, MARIA CECILIA", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "FERNANDEZ, LUIS ALFREDO", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "FLORES, ANDREA CAROLINA", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "MANSILLA PEREZ, MARIA NOELIA DE LAS MERCEDES", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "RIOS, SOFIA", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "SARAVIA, ARIEL FERNANDO", "width": 1}, {"from": "Antropolog\u00eda", "title": "pertenece_a", "to": "SUAREZ, MARIA EUGENIA", "width": 1}, {"from": "ARCE DE PIERO, MARIO LEANDRO", "title": "pertenece_a", "to": "Letras", "width": 1}, {"from": "ARCE DE PIERO, MARIO LEANDRO", "title": "dirige", "to": "SOSA, MARCELA BEATRIZ", "width": 1}, {"from": "Letras", "title": "pertenece_a", "to": "FLEMING, MARIA LUCILA", "width": 1}, {"from": "Letras", "title": "pertenece_a", "to": "MANINO, MARCIA MURIEL", "width": 1}, {"from": "Letras", "title": "pertenece_a", "to": "SORIA QUISPE, JOSEFINA MERCEDES", "width": 1}, {"from": "Letras", "title": "pertenece_a", "to": "VARGAS FONSECA, ELUNEY ANAHI", "width": 1}, {"from": "ATAIDE, SORAYA", "title": "pertenece_a", "to": "Ciencias Sociales", "width": 1}, {"from": "ATAIDE, SORAYA", "title": "dirige", "to": "PIZARRO, CYNTHIA", "width": 1}, {"from": "Ciencias Sociales", "title": "pertenece_a", "to": "FERNANDEZ, GONZALO JUAN JOSE", "width": 1}, {"from": "Ciencias Sociales", "title": "pertenece_a", "to": "MORALES, MARIA SILVIA", "width": 1}, {"from": "Ciencias Sociales", "title": "pertenece_a", "to": "ORTEGA, MARIANA DE LOS ANGELES", "width": 1}, {"from": "Ciencias Sociales", "title": "pertenece_a", "to": "ZURITA, INES PATRICIA", "width": 1}, {"from": "Ciencias Sociales", "title": "pertenece_a", "to": "PEDRAZA, MELANIE LUTMILA", "width": 1}, {"from": "BARBOZA, PAUL RICHART", "title": "pertenece_a", "to": "Historia", "width": 1}, {"from": "BARBOZA, PAUL RICHART", "title": "dirige", "to": "RABINOVICH, ALEJANDRO", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "BORGOGNONI, EZEQUIEL", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "CHILIGUAY, ALEJANDRO NICOLAS", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "CORREA, MARCELO", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "ELIAS, MARIA EUGENIA ROSA", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "HAMUD FERNANDEZ, LEANDRO", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "LUZZI, MARCELO ARMANDO", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "MONTA\u00d1EZ FERNANDEZ, VIRGINIA ROSANA", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "MORALES MIY, EVA ANAHI", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "QUINTEROS, VICTOR ENRIQUE", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "RUEDA, SERGIO FACUNDO", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "TAMBELLA, FRANCO LUCIANO", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "VILLANUEVA, JAVIER HIPOLITO", "width": 1}, {"from": "Historia", "title": "pertenece_a", "to": "CAMPOS, ROCIO SOLEDAD", "width": 1}, {"from": "BARROZO, NATALIA NOEMI", "title": "pertenece_a", "to": "Ciencias de la Educaci\u00f3n", "width": 1}, {"from": "BARROZO, NATALIA NOEMI", "title": "dirige", "to": "PANTANO, LILIANA", "width": 1}, {"from": "Ciencias de la Educaci\u00f3n", "title": "pertenece_a", "to": "CARLOS, NADIA IVONNE", "width": 1}, {"from": "Ciencias de la Educaci\u00f3n", "title": "pertenece_a", "to": "FLORES, SILVANA CAROLINA", "width": 1}, {"from": "Ciencias de la Educaci\u00f3n", "title": "pertenece_a", "to": "MACIEL, MARIA MAGDALENA", "width": 1}, {"from": "Ciencias de la Educaci\u00f3n", "title": "pertenece_a", "to": "PEREZ, ROMINA DE LAS MERCEDES", "width": 1}, {"from": "Ciencias de la Educaci\u00f3n", "title": "pertenece_a", "to": "SORIANO, GONZALO VICTOR HUMBERTO", "width": 1}, {"from": "Ciencias de la Educaci\u00f3n", "title": "pertenece_a", "to": "TARIFA FERNANDEZ, VIVIANA MARCELA", "width": 1}, {"from": "Ciencias de la Educaci\u00f3n", "title": "pertenece_a", "to": "VERA, MARIEL FERNANDA DEL ROSARIO", "width": 1}, {"from": "BORDON, ESTEBAN ISMAEL", "title": "pertenece_a", "to": "Comunicaci\u00f3n Social", "width": 1}, {"from": "BORDON, ESTEBAN ISMAEL", "title": "dirige", "to": "ALBARELLO, FRANCISCO", "width": 1}, {"from": "Comunicaci\u00f3n Social", "title": "pertenece_a", "to": "DEHARBE, DIANA CAROLINA", "width": 1}, {"from": "Comunicaci\u00f3n Social", "title": "pertenece_a", "to": "MORALES MIY, IGNACIO NAIME", "width": 1}, {"from": "BORGOGNONI, EZEQUIEL", "title": "dirige", "to": "GALPERIN, KARINA", "width": 1}, {"from": "CABRAL ORTIZ, JORGE ESTEBAN", "title": "pertenece_a", "to": "Arqueolog\u00eda", "width": 1}, {"from": "Arqueolog\u00eda", "title": "pertenece_a", "to": "CARDOZO, RODRIGO SEBASTIAN", "width": 1}, {"from": "Arqueolog\u00eda", "title": "pertenece_a", "to": "CORNEJO MALTZ, BERNARDO GABRIEL", "width": 1}, {"from": "Arqueolog\u00eda", "title": "pertenece_a", "to": "GARCIA DE CECCO, MARIA PILAR", "width": 1}, {"from": "Arqueolog\u00eda", "title": "pertenece_a", "to": "MACORITTO TORCIVIA, CLAUDIA", "width": 1}, {"from": "Arqueolog\u00eda", "title": "pertenece_a", "to": "TORRES LOPEZ, VALENTINA LUCIA", "width": 1}, {"from": "Arqueolog\u00eda", "title": "pertenece_a", "to": "GANAM CAMPOS, FLORENCIA CECILIA", "width": 1}, {"from": "Arqueolog\u00eda", "title": "pertenece_a", "to": "CARABAJAL, MICAELA CONSTANZA", "width": 1}, {"from": "CARDOZO, RODRIGO SEBASTIAN", "title": "dirige", "to": "LEDESMA, ROSSANA ELIZABETH", "width": 1}, {"from": "LEDESMA, ROSSANA ELIZABETH", "title": "dirige", "to": "CARABAJAL, MICAELA CONSTANZA", "width": 1}, {"from": "CARLOS, NADIA IVONNE", "title": "dirige", "to": "BULIUBASICH, EMILIANA CATALINA", "width": 1}, {"from": "CHILIGUAY, ALEJANDRO NICOLAS", "title": "dirige", "to": "NIEVA, GUILLERMO RENE", "width": 1}, {"from": "NIEVA, GUILLERMO RENE", "title": "dirige", "to": "CORREA, MARCELO", "width": 1}, {"from": "NIEVA, GUILLERMO RENE", "title": "dirige", "to": "ELIAS, MARIA EUGENIA ROSA", "width": 1}, {"from": "NIEVA, GUILLERMO RENE", "title": "dirige", "to": "VILLANUEVA, JAVIER HIPOLITO", "width": 1}, {"from": "NIEVA, GUILLERMO RENE", "title": "dirige", "to": "CAMPOS, ROCIO SOLEDAD", "width": 1}, {"from": "CORNEJO MALTZ, BERNARDO GABRIEL", "title": "dirige", "to": "NIELSEN, AXEL", "width": 1}, {"from": "COSSO, PABLO ESTEBAN", "title": "dirige", "to": "CERIANI CERNADAS, C\u00c9SAR", "width": 1}, {"from": "DI PIETRO, NOELIA DANIELA", "title": "dirige", "to": "OSSOLA, MARIA MACARENA", "width": 1}, {"from": "OSSOLA, MARIA MACARENA", "title": "dirige", "to": "SORIANO, GONZALO VICTOR HUMBERTO", "width": 1}, {"from": "DIMARCO, LUCIANA SOFIA", "title": "dirige", "to": "VILLAGRAN, ANDREA JIMENA", "width": 1}, {"from": "DURAN, ROMINA GISELA", "title": "pertenece_a", "to": "Ling\u00fc\u00edstica", "width": 1}, {"from": "DURAN, ROMINA GISELA", "title": "dirige", "to": "C\u00daNEO, PAOLA", "width": 1}, {"from": "FERNANDEZ, GONZALO JUAN JOSE", "title": "dirige", "to": "PRESTA, SUSANA", "width": 1}, {"from": "FERRO, GABRIELA KAREN", "title": "pertenece_a", "to": "S/D", "width": 1}, {"from": "S/D", "title": "pertenece_a", "to": "GONZALEZ ROMANO, JOSE FRANCISCO", "width": 1}, {"from": "S/D", "title": "pertenece_a", "to": "JEREZ HENRIQUEZ, BARBARA PAZ", "width": 1}, {"from": "S/D", "title": "pertenece_a", "to": "PEREZ, GABRIEL ANGEL", "width": 1}, {"from": "S/D", "title": "pertenece_a", "to": "ELIAS, RACHUAN FLORENCIO GUSTAVO", "width": 1}, {"from": "S/D", "title": "pertenece_a", "to": "ACU\u00d1A MARTINEZ, JOSEFO", "width": 1}, {"from": "S/D", "title": "pertenece_a", "to": "BELMONT COLOMBRES, MAR\u00cdA EUGENIA", "width": 1}, {"from": "FLEMING, MARIA LUCILA", "title": "dirige", "to": "A\u00d1\u00d3N, VALERIA", "width": 1}, {"from": "FLORES, ANDREA CAROLINA", "title": "dirige", "to": "ALVAREZ LEGUIZAMON, SONIA", "width": 1}, {"from": "FLORES, SILVANA CAROLINA", "title": "dirige", "to": "GUTIERREZ, TALIA VIOLETA", "width": 1}, {"from": "FORMIA, MARTIN EZEQUIEL", "title": "pertenece_a", "to": "Geograf\u00eda", "width": 1}, {"from": "FORMIA, MARTIN EZEQUIEL", "title": "dirige", "to": "FLORES KLARIK, MONICA NOEMI", "width": 1}, {"from": "GARCIA DE CECCO, MARIA PILAR", "title": "dirige", "to": "RIVOLTA, MARIA CLARA", "width": 1}, {"from": "GONZALEZ MOLINA, MARIO AUGUSTO", "title": "pertenece_a", "to": "Literatura", "width": 1}, {"from": "GONZALEZ MOLINA, MARIO AUGUSTO", "title": "dirige", "to": "FINE, RUTH", "width": 1}, {"from": "Literatura", "title": "pertenece_a", "to": "GRANEROS, MATIAS GERARDO", "width": 1}, {"from": "GONZALEZ, MARIA EUGENIA", "title": "pertenece_a", "to": "Psicolog\u00eda", "width": 1}, {"from": "GRANEROS, MATIAS GERARDO", "title": "dirige", "to": "LOPEZ, IRENE NOEMI", "width": 1}, {"from": "LOPEZ, IRENE NOEMI", "title": "dirige", "to": "TABARCACHE, LUCAS MATIAS", "width": 1}, {"from": "HAMUD FERNANDEZ, LEANDRO", "title": "dirige", "to": "MATA, SARA EMILIA", "width": 1}, {"from": "MATA, SARA EMILIA", "title": "dirige", "to": "MORALES MIY, EVA ANAHI", "width": 1}, {"from": "MATA, SARA EMILIA", "title": "dirige", "to": "QUINTEROS, VICTOR ENRIQUE", "width": 1}, {"from": "MACORITTO TORCIVIA, CLAUDIA", "title": "dirige", "to": "DE FEO, MAR\u00cdA EUGENIA", "width": 1}, {"from": "MANINO, MARCIA MURIEL", "title": "dirige", "to": "SOSA, CARLOS HERNAN", "width": 1}, {"from": "MANSILLA PEREZ, MARIA NOELIA DE LAS MERCEDES", "title": "dirige", "to": "GODOY, MARIANA INES", "width": 1}, {"from": "MONTA\u00d1EZ FERNANDEZ, VIRGINIA ROSANA", "title": "dirige", "to": "QUI\u00d1ONEZ, MARIA MERCEDES", "width": 1}, {"from": "MORALES, MARIA SILVIA", "title": "dirige", "to": "RODRIGUEZ, NURIA MACARENA", "width": 1}, {"from": "ORTEGA, MARIANA DE LOS ANGELES", "title": "dirige", "to": "RUIDREJO, ANGEL ALEJANDRO", "width": 1}, {"from": "RUIDREJO, ANGEL ALEJANDRO", "title": "dirige", "to": "PERALTA, JUAN ALEXANDER", "width": 1}, {"from": "PERALTA, JUAN ALEXANDER", "title": "pertenece_a", "to": "Filosof\u00eda", "width": 1}, {"from": "Filosof\u00eda", "title": "pertenece_a", "to": "VARGAS, MARIELA SILVANA", "width": 1}, {"from": "RIOS, SOFIA", "title": "dirige", "to": "VILLALTA, CARLA", "width": 1}, {"from": "RUEDA, SERGIO FACUNDO", "title": "dirige", "to": "CHAILE, TELMA LILIANA", "width": 1}, {"from": "SORAIRE, ANALIA FLORENCIA", "title": "pertenece_a", "to": "Estudios Sociales y de la Cultura", "width": 1}, {"from": "Estudios Sociales y de la Cultura", "title": "pertenece_a", "to": "TABARCACHE, LUCAS MATIAS", "width": 1}, {"from": "Estudios Sociales y de la Cultura", "title": "pertenece_a", "to": "ACOSTA, DELFINA", "width": 1}, {"from": "Estudios Sociales y de la Cultura", "title": "pertenece_a", "to": "PERALTA, DELIA", "width": 1}, {"from": "Estudios Sociales y de la Cultura", "title": "pertenece_a", "to": "SALVA, ANAHI MAGDALENA", "width": 1}, {"from": "SORIA QUISPE, JOSEFINA MERCEDES", "title": "dirige", "to": "GUZM\u00c1N, RAQUEL", "width": 1}, {"from": "SUAREZ, MARIA EUGENIA", "title": "dirige", "to": "TRPIN, VERONICA", "width": 1}, {"from": "TARIFA FERNANDEZ, VIVIANA MARCELA", "title": "dirige", "to": "BOCCHIO, CECILIA", "width": 1}, {"from": "TORRES LOPEZ, VALENTINA LUCIA", "title": "dirige", "to": "MORALEJO, REINALDO", "width": 1}, {"from": "VARA, JESICA MICAELA", "title": "pertenece_a", "to": "Sociolog\u00eda", "width": 1}, {"from": "VARA, JESICA MICAELA", "title": "dirige", "to": "CANEVARO, SANTIAGO", "width": 1}, {"from": "ZURITA, INES PATRICIA", "title": "dirige", "to": "CEBRELLI, ALEJANDRA LIA JULIA", "width": 1}, {"from": "GANAM CAMPOS, FLORENCIA CECILIA", "title": "dirige", "to": "CAMPENY, SARA MARIA LUISA", "width": 1}, {"from": "PEDRAZA, MELANIE LUTMILA", "title": "dirige", "to": "GONZ\u00c1LEZ, FACUNDO", "width": 1}, {"from": "GONZ\u00c1LEZ, FACUNDO", "title": "dirige", "to": "VILTE, GENARO JUAN LEONARDO", "width": 1}, {"from": "VARGAS FONSECA, ELUNEY ANAHI", "title": "dirige", "to": "CAMPUZANO, BETINA", "width": 1}, {"from": "CAMPUZANO, BETINA", "title": "dirige", "to": "PEREZ, GABRIEL ANGEL", "width": 1}, {"from": "VERA, MARIEL FERNANDA DEL ROSARIO", "title": "dirige", "to": "BOCCARDI, FACUNDO", "width": 1}, {"from": "VILTE, GENARO JUAN LEONARDO", "title": "pertenece_a", "to": "Demograf\u00eda", "width": 1}, {"from": "ACOSTA, DELFINA", "title": "dirige", "to": "JUSTO VON LURZER, CAROLINA", "width": 1}, {"from": "PERALTA, DELIA", "title": "dirige", "to": "CARPIO, MAR\u00cdA BEL\u00c9N", "width": 1}, {"from": "LOPEZ, FABIANA", "title": "pertenece_a", "to": "Humanidades", "width": 1}, {"from": "LOPEZ, FABIANA", "title": "dirige", "to": "ROMERO, NESTOR HUGO", "width": 1}, {"from": "ROMERO, NESTOR HUGO", "title": "dirige", "to": "ACU\u00d1A MARTINEZ, JOSEFO", "width": 1}, {"from": "GODOY, SANTIAGO", "title": "pertenece_a", "to": "M\u00fasica", "width": 1}, {"from": "GODOY, SANTIAGO", "title": "dirige", "to": "ULM, HERN\u00c1N RODOLFO", "width": 1}, {"from": "SALVA, ANAHI MAGDALENA", "title": "dirige", "to": "ALVAREZ CHAMALE, MARIA FERNANDA", "width": 1}, {"from": "ELIAS, RACHUAN FLORENCIO GUSTAVO", "title": "dirige", "to": "CHRISTEL, LUCAS GABRIEL", "width": 1}, {"from": "BELMONT COLOMBRES, MAR\u00cdA EUGENIA", "title": "dirige", "to": "GIL, JOSE FERNANDO", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "solver": "forceAtlas2Based", "forceAtlas2Based": {"gravitationalConstant": -50, "centralGravity": 0.02, "springLength": 80, "springConstant": 0.05, "damping": 0.88, "avoidOverlap": 1}, "stabilization": {"enabled": true, "iterations": 500, "fit": true}}, "interaction": {"dragNodes": true, "dragView": true, "zoomView": true}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+                      network.on("stabilizationProgress", function(params) {
+                          document.getElementById('loadingBar').removeAttribute("style");
+                          var maxWidth = 496;
+                          var minWidth = 20;
+                          var widthFactor = params.iterations/params.total;
+                          var width = Math.max(minWidth,maxWidth * widthFactor);
+                          document.getElementById('bar').style.width = width + 'px';
+                          document.getElementById('text').innerHTML = Math.round(widthFactor*100) + '%';
+                      });
+                      network.once("stabilizationIterationsDone", function() {
+                          document.getElementById('text').innerHTML = '100%';
+                          document.getElementById('bar').style.width = '496px';
+                          document.getElementById('loadingBar').style.opacity = 0;
+                          // really clean the dom element
+                          setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
+                      });
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+<script>
+//agregue esto
+network.moveTo({
+  scale: 1.2
+});
+
+
+// --- Física controlada ---
+network.once("stabilizationIterationsDone", function () {
+  network.setOptions({ physics: false });
+});
+
+function liberarGrupo(nodeId) {
+  let ids = network.getConnectedNodes(nodeId);
+  ids.push(nodeId);
+  ids.forEach(id => {
+    network.body.data.nodes.update({ id: id, fixed: {x:false, y:false} });
+  });
+  return ids;
+}
+
+function fijarGrupo(ids) {
+  ids.forEach(id => {
+    network.body.data.nodes.update({ id: id, fixed: {x:true, y:true} });
+  });
+}
+
+let grupoActivo = [];
+
+network.on("dragStart", function (params) {
+  if (params.nodes.length > 0) {
+    network.setOptions({ physics: true });
+    grupoActivo = liberarGrupo(params.nodes[0]);
+  }
+});
+
+network.on("dragEnd", function () {
+  fijarGrupo(grupoActivo);
+  grupoActivo = [];
+  network.setOptions({ physics: false });
+});
+
+// --- Filtro formacion_doctoral ---
+const todosLosNodos = network.body.data.nodes.get();
+const todasLasAristas = network.body.data.edges.get();
+
+function aplicarFiltro(valor) {
+  if (valor === "todos") {
+    // Mostrar todo
+    network.body.data.nodes.update(
+      todosLosNodos.map(n => ({ id: n.id, hidden: false }))
+    );
+    network.body.data.edges.update(
+      todasLasAristas.map(e => ({ id: e.id, hidden: false }))
+    );
+    return;
+  }
+
+  // Nodos de personas que NO cumplen el filtro → ocultar
+  const nodosOcultos = new Set();
+
+  todosLosNodos.forEach(n => {
+    // Solo filtramos por formacion; nodos sin formacion (area, director, etc.)
+    // se muestran/ocultan según si quedaron aislados
+    if (n.formacion && n.formacion !== "" && n.formacion !== valor) {
+      nodosOcultos.add(n.id);
+    }
+  });
+
+  // Aristas: ocultar si alguno de sus extremos está oculto
+  const aristasOcultas = new Set();
+  todasLasAristas.forEach(e => {
+    if (nodosOcultos.has(e.from) || nodosOcultos.has(e.to)) {
+      aristasOcultas.add(e.id);
+    }
+  });
+
+  // Nodos sin formacion propia: ocultarlos si todas sus aristas quedaron ocultas
+  todosLosNodos.forEach(n => {
+    if (!n.formacion || n.formacion === "") {
+      const aristasDelNodo = todasLasAristas.filter(
+        e => e.from === n.id || e.to === n.id
+      );
+      const todasOcultas = aristasDelNodo.every(e => aristasOcultas.has(e.id));
+      if (todasOcultas && aristasDelNodo.length > 0) {
+        nodosOcultos.add(n.id);
+      }
+    }
+  });
+
+  network.body.data.nodes.update(
+    todosLosNodos.map(n => ({ id: n.id, hidden: nodosOcultos.has(n.id) }))
+  );
+  network.body.data.edges.update(
+    todasLasAristas.map(e => ({ id: e.id, hidden: aristasOcultas.has(e.id) }))
+  );
+}
+</script>
+
+</body>
+</html>
