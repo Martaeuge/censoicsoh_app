@@ -2934,10 +2934,18 @@ with tabs[9]:  # tabs[5] porque los índices empiezan en 0
     # -------------------------------
     # Cargar datos
     # -------------------------------
+    import os
     @st.cache_data
     def cargar_datos():
         #df = pd.read_csv("todo.csv", encoding="latin1", sep=",")
-        df = pd.read_csv("todo.csv", encoding="UTF-8", sep=",")
+        
+        # Ruta relativa al archivo app.py
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        ruta = os.path.join(base_dir, "todo.csv")
+        df = pd.read_csv(ruta, encoding="UTF-8", sep=",")
+    
+        
+    #    df = pd.read_csv("todo.csv", encoding="UTF-8", sep=",")
         df.columns = df.columns.str.strip()
         df["anio_paper"] = pd.to_numeric(df["anio_paper"], errors="coerce").astype("Int64")
 
